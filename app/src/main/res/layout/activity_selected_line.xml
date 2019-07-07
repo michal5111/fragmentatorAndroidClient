@@ -34,12 +34,12 @@
             android:textSize="18sp"/>
     <com.android.volley.toolbox.NetworkImageView
             android:layout_width="0dp"
-            android:layout_height="wrap_content" app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="0dp" app:srcCompat="@mipmap/ic_launcher_round"
             android:id="@+id/SelectedLineImageView"
-            app:layout_constraintTop_toBottomOf="@+id/SelectedLineTextView"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintHorizontal_bias="0.486"/>
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/SelectedLineProgressBar"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/SelectedLineTextView"/>
     <Button
             android:text="Pobierz"
             android:layout_width="218dp"
@@ -49,4 +49,14 @@
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp" app:layout_constraintVertical_bias="1.0"/>
+    <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/SelectedLineProgressBar"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintHorizontal_bias="0.498"
+            android:layout_marginBottom="236dp" app:layout_constraintBottom_toTopOf="@+id/SelectedLineDownloadButton"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/SelectedLineImageView"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,13 @@
 package com.example.springfragmenterclient
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.Html
+import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
@@ -13,34 +18,41 @@ import org.json.JSONObject
 
 class SelectedLineActivity : AppCompatActivity() {
 
-    lateinit var imageView: NetworkImageView
-    lateinit var selectedMovieTitleTextView: TextView
-    lateinit var selectedMovieTimeTextView: TextView
-    lateinit var selectedLineTextView: TextView
-    lateinit var selectedMovie: Movie
-    lateinit var selectedLine: Line
+    private lateinit var imageView: NetworkImageView
+    private lateinit var movieTitleTextView: TextView
+    private lateinit var movieTimeTextView: TextView
+    private lateinit var textView: TextView
+    private lateinit var selectedMovie: Movie
+    private lateinit var selectedLine: Line
+    private lateinit var progressBar: ProgressBar
+    private lateinit var downloadButton: Button
+    private lateinit var movie: Movie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_line)
         imageView = findViewById(R.id.SelectedLineImageView)
-        selectedMovieTimeTextView = findViewById(R.id.SelectedLineTimeTextView)
-        selectedMovieTitleTextView = findViewById(R.id.SelectedLineTitleTextView)
-        selectedLineTextView = findViewById(R.id.SelectedLineTextView)
+        movieTimeTextView = findViewById(R.id.SelectedLineTimeTextView)
+        movieTitleTextView = findViewById(R.id.SelectedLineTitleTextView)
+        textView = findViewById(R.id.SelectedLineTextView)
+        progressBar = findViewById(R.id.SelectedLineProgressBar)
         selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
-        selectedMovieTitleTextView.text = selectedMovie.fileName
-        selectedMovieTimeTextView.text = selectedLine.timeString
-        selectedLineTextView.text = selectedLine.textLines
+        movieTitleTextView.text = selectedMovie.fileName
+        movieTimeTextView.text = selectedLine.timeString
+        textView.text = HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
+        downloadButton = findViewById(R.id.SelectedLineDownloadButton)
+        downloadButton.setOnClickListener {
+            val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
+                putExtra("SELECTED_MOVIE",movie)
+            }
+            startActivity(intent)
+        }
     }
 
     override fun onStart() {
         super.onStart()
-//        RequestQueueSingleton.getInstance(this.applicationContext).imageLoader
-//            .get("$url/${selectedMovie.fileName}${selectedLine.number}",
-//                ImageLoader.getImageListener(imageView,R.drawable.ic_launcher_background,
-//                    R.drawable.ic_launcher_foreground))
-        val movie: Movie = Movie()
+        movie = Movie()
         movie.fileName = selectedMovie.fileName
         movie.path = selectedMovie.path
         movie.subtitles = SubtitlesFile()
@@ -48,10 +60,11 @@ class SelectedLineActivity : AppCompatActivity() {
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
         val movieJsonString = gson.toJson(movie)
         val jsonObject = JSONObject(movieJsonString)
-        var snapshotRequest = (this.applicationContext as Fragmentator4000).getSnapshotRequest(
+        val snapshotRequest = (this.applicationContext as Fragmentator4000).getSnapshotRequest(
             jsonObject,
             imageView,
-            RequestQueueSingleton.getInstance(this.applicationContext).imageLoader
+            RequestQueueSingleton.getInstance(this.applicationContext).imageLoader,
+            progressBar
         )
         RequestQueueSingleton.getInstance(this.applicationContext).addToRequestQueue(snapshotRequest)
     }

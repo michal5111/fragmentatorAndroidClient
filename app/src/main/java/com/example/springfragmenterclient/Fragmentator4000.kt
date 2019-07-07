@@ -3,6 +3,7 @@ package com.example.springfragmenterclient
 import android.app.Application
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -19,10 +20,10 @@ import org.json.JSONObject
 
 class Fragmentator4000 : Application() {
 
-    var movies: List<Movie> = emptyList()
+    private var movies: List<Movie> = emptyList()
     companion object {
-        val url = "http://michal5111.asuscomm.com:8080"
-        val movieListType = object : TypeToken<List<Movie>>() {}.type
+        const val url = "http://michal5111.asuscomm.com:8080"
+        val movieListType = object : TypeToken<List<Movie>>() {}.type!!
     }
 
     fun getMoviesRequest(fraze: String, recyclerView: RecyclerView, progressBar: ProgressBar): JsonArrayRequest {
@@ -34,8 +35,7 @@ class Fragmentator4000 : Application() {
                 progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
-                println("ERROR: ${error.message}")
-                println(error.localizedMessage)
+                Toast.makeText(applicationContext,"error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.INVISIBLE
             }
         )
@@ -46,22 +46,23 @@ class Fragmentator4000 : Application() {
         return jsonArrayRequest
     }
 
-    fun getSnapshotRequest(movie: JSONObject, networkImageView: NetworkImageView, imageLoader: ImageLoader) : JsonObjectRequest {
-        val jsonArrayRequest = JsonObjectRequest(Request.Method.POST, "$url/rest/linesnapshot", movie,
+    fun getSnapshotRequest(movie: JSONObject, networkImageView: NetworkImageView, imageLoader: ImageLoader, progressBar: ProgressBar) : JsonObjectRequest {
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, "$url/rest/linesnapshot", movie,
             Response.Listener { response ->
                 val gson = Gson()
                 val json = gson.fromJson(response.toString(), com.example.springfragmenterclient.Entities.Response::class.java)
                 networkImageView.setImageUrl(json.url,imageLoader)
+                progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
-                println("ERROR: ${error.message}")
-                println(error.localizedMessage)
+                progressBar.visibility = View.INVISIBLE
+                Toast.makeText(applicationContext,"error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         )
-        jsonArrayRequest.retryPolicy = DefaultRetryPolicy(
-            20000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            1000,
+            20,
             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-        return jsonArrayRequest
+        return jsonObjectRequest
     }
 }

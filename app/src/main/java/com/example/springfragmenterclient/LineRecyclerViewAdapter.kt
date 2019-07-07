@@ -1,9 +1,11 @@
 package com.example.springfragmenterclient
 
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Entities.Line
 
@@ -22,7 +24,7 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.timeTextView.text = dataSet[position].timeString
-        viewHolder.lineTextView.text = dataSet[position].textLines
+        viewHolder.lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
         viewHolder.lineTextView.setOnClickListener {
             (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent,dataSet[position])
         }

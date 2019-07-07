@@ -31,7 +31,9 @@ class MainActivity : AppCompatActivity() {
 
         searchButton.setOnClickListener {
             progressBar.visibility = View.VISIBLE;
-            RequestQueueSingleton.getInstance(this).addToRequestQueue(applicationContext.getMoviesRequest(frazeInput.text.toString(),recyclerView, progressBar))
+            RequestQueueSingleton.getInstance(this)
+                .addToRequestQueue(
+                    applicationContext.getMoviesRequest(frazeInput.text.toString(),recyclerView, progressBar))
         }
     }
 

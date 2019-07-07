@@ -13,6 +13,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".FragmentRequestActivity">
+        </activity>
         <activity android:name=".SelectedLineActivity">
         </activity>
         <activity android:name=".MainActivity">
