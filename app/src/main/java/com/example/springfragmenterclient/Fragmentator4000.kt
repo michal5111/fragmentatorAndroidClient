@@ -24,6 +24,14 @@ class Fragmentator4000 : Application() {
     companion object {
         const val url = "http://michal5111.asuscomm.com:8080"
         val movieListType = object : TypeToken<List<Movie>>() {}.type!!
+
+        fun timeToSeconds(time: String): Double {
+            val split = time.split(":")
+            val hours = split[0].toDouble()
+            val minutes = split[1].toDouble()
+            val seconds = split[2].toDouble()
+            return hours * 3600 + minutes * 60 + seconds
+        }
     }
 
     fun getMoviesRequest(fraze: String, recyclerView: RecyclerView, progressBar: ProgressBar): JsonArrayRequest {

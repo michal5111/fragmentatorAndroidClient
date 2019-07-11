@@ -34,7 +34,8 @@
             android:id="@+id/SearchButton"
             app:layout_constraintStart_toEndOf="@+id/textInputLayout"
             android:layout_marginStart="16dp" android:layout_marginTop="32dp"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
     <ProgressBar
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
