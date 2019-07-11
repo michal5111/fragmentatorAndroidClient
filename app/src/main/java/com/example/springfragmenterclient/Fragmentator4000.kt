@@ -16,6 +16,8 @@ import com.example.springfragmenterclient.Entities.Movie
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
+import android.app.Activity
+import android.view.inputmethod.InputMethodManager
 
 
 class Fragmentator4000 : Application() {
@@ -27,10 +29,20 @@ class Fragmentator4000 : Application() {
 
         fun timeToSeconds(time: String): Double {
             val split = time.split(":")
+            if (split.size < 3) return 0.0
             val hours = split[0].toDouble()
             val minutes = split[1].toDouble()
             val seconds = split[2].toDouble()
             return hours * 3600 + minutes * 60 + seconds
+        }
+
+        fun hideKeyboard(activity: Activity) {
+            val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            var view = activity.currentFocus
+            if (view == null) {
+                view = View(activity)
+            }
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 

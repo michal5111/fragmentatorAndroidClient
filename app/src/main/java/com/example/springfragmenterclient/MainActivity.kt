@@ -2,6 +2,7 @@ package com.example.springfragmenterclient
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -16,7 +17,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        //val queue = RequestQueueSingleton.getInstance(this.applicationContext).requestQueue
         val applicationContext = applicationContext as Fragmentator4000
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity() {
 
 
         searchButton.setOnClickListener {
-            progressBar.visibility = View.VISIBLE;
+            Fragmentator4000.hideKeyboard(this)
+            progressBar.visibility = View.VISIBLE
             RequestQueueSingleton.getInstance(this)
                 .addToRequestQueue(
                     applicationContext.getMoviesRequest(frazeInput.text.toString(),recyclerView, progressBar))
