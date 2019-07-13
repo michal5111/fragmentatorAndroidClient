@@ -35,46 +35,75 @@
             android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/scrollView2"/>
     <TableLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/tableLayout" android:layout_marginTop="7dp"
             app:layout_constraintTop_toBottomOf="@+id/ConversionprogressBar">
 
-        <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            <TextView
+                    android:text="Przesunięcie startu:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/textView"/>
+            <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:ems="10"
+                    android:id="@+id/startOffsetEditText" android:hint="Przesunięcie startu"/>
+        </TableRow>
+        <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            <TextView
+                    android:text="Przesunięcie końca:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/textView2"/>
+            <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:ems="10"
+                    android:id="@+id/stopOffsetEditText" android:hint="Przesunięcie końca"/>
+        </TableRow>
+        <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
+                  android:gravity="center_horizontal"
+                  style="?buttonBarStyle">
             <Button
+                    style="?buttonBarButtonStyle"
                     android:text="Otwórz"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/OpenButton"
-                    android:visibility="visible"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
-                    android:enabled="false"/>
-        </TableRow>
-        <TableRow android:layout_width="159dp" android:layout_height="wrap_content">
+                    android:enabled="false" android:textAlignment="center"/>
             <Button
+                    style="?buttonBarButtonStyle"
                     android:text="Konwertuj"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:id="@+id/ConvertButton"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="295dp"
-                    android:layout_marginBottom="8dp" app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginLeft="8dp" app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_marginRight="295dp" app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
-            <Button
-                    android:text="Pobierz"
+                    android:id="@+id/ConvertButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/DownloadButton"
                     android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp" android:textAlignment="center"/>
+            <Button
+                    style="?buttonBarButtonStyle"
+                    android:text="Pobierz"
+                    android:id="@+id/DownloadButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
-                    android:visibility="visible"
-            />
+                    android:enabled="false" android:textAlignment="center"/>
         </TableRow>
     </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

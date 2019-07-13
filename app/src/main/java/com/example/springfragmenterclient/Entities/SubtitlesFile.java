@@ -9,9 +9,10 @@ import java.util.List;
 //@JsonDeserialize(as = SRTSubtitlesFile.class)
 public class SubtitlesFile implements Serializable {
 
+    @Expose
     private String filename;
     @Expose
-    protected List<Line> filteredLines = new LinkedList<>();
+    private List<Line> filteredLines = new LinkedList<>();
 
     public List<Line> getFilteredLines() {
         return filteredLines;

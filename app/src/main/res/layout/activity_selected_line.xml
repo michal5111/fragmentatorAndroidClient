@@ -38,7 +38,8 @@
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/SelectedLineProgressBar"
             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/SelectedLineTextView"/>
     <Button
-            android:text="Pobierz"
+            style="?buttonBarButtonStyle"
+            android:text="Wybierz"
             android:layout_width="218dp"
             android:layout_height="49dp"
             android:id="@+id/SelectedLineDownloadButton" android:layout_marginTop="8dp"

@@ -56,6 +56,7 @@ class SelectedLineActivity : AppCompatActivity() {
         movie.fileName = selectedMovie.fileName
         movie.path = selectedMovie.path
         movie.subtitles = SubtitlesFile()
+        movie.subtitles.filename = selectedMovie.subtitles.filename
         movie.subtitles.filteredLines.add(selectedLine)
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
         val movieJsonString = gson.toJson(movie)
