@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">SpringFragmenterClient</string>
+    <string name="app_name">Spring Fragmenter Client</string>
+    <string name="download">Pobierz</string>
+    <string name="convert">Konwertuj</string>
+    <string name="open">Otwórz</string>
+    <string name="startOffset">Przesunięcie startu</string>
+    <string name="stopOffset">Przesunięcie końca</string>
+    <string name="typeFraze">Wpisz frazę</string>
+    <string name="search">Szukaj</string>
+    <string name="select">Wybierz</string>
 </resources>

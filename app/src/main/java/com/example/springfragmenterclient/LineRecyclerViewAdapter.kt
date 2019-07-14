@@ -26,10 +26,10 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
         viewHolder.timeTextView.text = dataSet[position].timeString
         viewHolder.lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
         viewHolder.lineTextView.setOnClickListener {
-            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent,dataSet[position])
+            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent!!,dataSet[position])
         }
         viewHolder.timeTextView.setOnClickListener {
-            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent,dataSet[position])
+            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent!!,dataSet[position])
         }
     }
     override fun getItemCount() = dataSet.size

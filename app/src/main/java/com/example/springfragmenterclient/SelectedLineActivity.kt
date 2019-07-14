@@ -11,7 +11,7 @@ import androidx.core.text.HtmlCompat
 import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
-import com.example.springfragmenterclient.Entities.SubtitlesFile
+import com.example.springfragmenterclient.Entities.Subtitles
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.json.JSONObject
@@ -55,7 +55,7 @@ class SelectedLineActivity : AppCompatActivity() {
         movie = Movie()
         movie.fileName = selectedMovie.fileName
         movie.path = selectedMovie.path
-        movie.subtitles = SubtitlesFile()
+        movie.subtitles = Subtitles()
         movie.subtitles.filename = selectedMovie.subtitles.filename
         movie.subtitles.filteredLines.add(selectedLine)
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()

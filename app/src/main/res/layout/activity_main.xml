@@ -19,7 +19,7 @@
         <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
-                android:hint="Wpisz frazę" android:id="@+id/FrazeInput"/>
+                android:hint="@string/typeFraze" android:id="@+id/FrazeInput"/>
     </com.google.android.material.textfield.TextInputLayout>
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
@@ -28,7 +28,7 @@
             app:layout_constraintEnd_toEndOf="parent" android:id="@+id/RecyclerView" android:clipToPadding="true"
             android:layout_marginBottom="24dp"/>
     <Button
-            android:text="Szukaj"
+            android:text="@android:string/search_go"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/SearchButton"

@@ -57,7 +57,6 @@ class FragmentRequestActivity : AppCompatActivity() {
             , object : EventHandler {
                 override fun onError(e: java.lang.Exception?) {
                     eventSource.close()
-                    println("error " + e.toString())
                     textView.post { textView.text = "error " + e.toString() }
                 }
 
@@ -65,7 +64,6 @@ class FragmentRequestActivity : AppCompatActivity() {
                 }
 
                 override fun onMessage(messageEvent: MessageEvent) {
-                    println("Message: "+ messageEvent.data)
                     if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
                         return
                     }
@@ -87,6 +85,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                         }
                     }
                     if (messageEvent.event.equals("complete")) {
+                        conversionProgressBar.progress = 100
                         eventSource.close()
                         openButton.post {
                             openButton.setOnClickListener {
@@ -114,7 +113,6 @@ class FragmentRequestActivity : AppCompatActivity() {
         scrollView = findViewById(R.id.scrollView2)
         startOffsetEditText = findViewById(R.id.startOffsetEditText)
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
-        conversionProgressBar.max = 99
         startOffsetEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 if (p0.isNullOrBlank() || p0.toString() == "-" || p0.toString() == "." || p0.toString() == ",") {
@@ -149,6 +147,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         })
         eventSource = createEventSource()
         convertButton.setOnClickListener {
+            conversionProgressBar.progress = 0
             convertButton.isEnabled = false
             eventSource = createEventSource()
             eventSource.connect()

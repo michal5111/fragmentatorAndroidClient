@@ -20,7 +20,8 @@ class RequestQueueSingleton constructor(context: Context) {
     }
     val imageLoader: ImageLoader by lazy {
         ImageLoader(requestQueue,
-            LruBitmapCache())
+            LruBitmapCache()
+        )
     }
     val requestQueue: RequestQueue by lazy {
         Volley.newRequestQueue(context.applicationContext)
