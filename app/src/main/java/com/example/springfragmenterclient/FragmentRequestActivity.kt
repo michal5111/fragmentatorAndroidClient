@@ -115,10 +115,10 @@ class FragmentRequestActivity : AppCompatActivity() {
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
         startOffsetEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
-                if (p0.isNullOrBlank() || p0.toString() == "-" || p0.toString() == "." || p0.toString() == ",") {
-                    line.startOffset = 0.0
-                } else {
+                try {
                     line.startOffset = p0.toString().toDouble()
+                } catch (e: Exception) {
+                    line.startOffset = 0.0
                 }
             }
 
@@ -131,10 +131,10 @@ class FragmentRequestActivity : AppCompatActivity() {
         })
         stopOffsetEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
-                if (p0.isNullOrBlank() || p0.toString() == "-" || p0.toString() == "." || p0.toString() == ",") {
-                    line.stopOffset = 0.0
-                } else {
+                try {
                     line.stopOffset = p0.toString().toDouble()
+                } catch (e: Exception) {
+                    line.stopOffset = 0.0
                 }
             }
 

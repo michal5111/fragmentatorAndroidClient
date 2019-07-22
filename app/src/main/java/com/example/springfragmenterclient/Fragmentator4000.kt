@@ -1,7 +1,9 @@
 package com.example.springfragmenterclient
 
+import android.app.Activity
 import android.app.Application
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -16,15 +18,13 @@ import com.example.springfragmenterclient.Entities.Movie
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
-import android.app.Activity
-import android.view.inputmethod.InputMethodManager
 
 
 class Fragmentator4000 : Application() {
 
     private var movies: List<Movie> = emptyList()
     companion object {
-        const val url = "http://michal5111.asuscomm.com:8080"
+        const val url = "http://michal5111.asuscomm.com:8080/rest"
         val movieListType = object : TypeToken<List<Movie>>() {}.type!!
 
         fun timeToSeconds(time: String): Double {
@@ -47,7 +47,8 @@ class Fragmentator4000 : Application() {
     }
 
     fun getMoviesRequest(fraze: String, recyclerView: RecyclerView, progressBar: ProgressBar): JsonArrayRequest {
-        val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, "$url/rest/search?fraze=$fraze", null,
+        val jsonArrayRequest = JsonArrayRequest(
+            Request.Method.GET, "$url/search?fraze=$fraze", null,
             Response.Listener { response ->
                 val gson = Gson()
                 movies = gson.fromJson(response.toString(), movieListType)
@@ -67,7 +68,8 @@ class Fragmentator4000 : Application() {
     }
 
     fun getSnapshotRequest(movie: JSONObject, networkImageView: NetworkImageView, imageLoader: ImageLoader, progressBar: ProgressBar) : JsonObjectRequest {
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, "$url/rest/linesnapshot", movie,
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.POST, "$url/linesnapshot", movie,
             Response.Listener { response ->
                 val gson = Gson()
                 val json = gson.fromJson(response.toString(), com.example.springfragmenterclient.Entities.Response::class.java)

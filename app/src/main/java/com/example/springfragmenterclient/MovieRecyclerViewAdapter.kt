@@ -31,4 +31,6 @@ class MovieRecyclerViewAdapter(private val dataSet: List<Movie>) : RecyclerView.
         viewHolder.lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
     }
     override fun getItemCount() = dataSet.size
+
+
 }

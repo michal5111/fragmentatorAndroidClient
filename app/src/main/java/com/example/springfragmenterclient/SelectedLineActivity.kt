@@ -2,8 +2,11 @@ package com.example.springfragmenterclient
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
 import android.text.Html
+import android.text.TextWatcher
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +30,7 @@ class SelectedLineActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var downloadButton: Button
     private lateinit var movie: Movie
+    private lateinit var editText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +40,7 @@ class SelectedLineActivity : AppCompatActivity() {
         movieTitleTextView = findViewById(R.id.SelectedLineTitleTextView)
         textView = findViewById(R.id.SelectedLineTextView)
         progressBar = findViewById(R.id.SelectedLineProgressBar)
+        editText = findViewById(R.id.SelectedLineEditText)
         selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
         movieTitleTextView.text = selectedMovie.fileName
@@ -48,6 +53,19 @@ class SelectedLineActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        editText.setText(HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY))
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                selectedLine.textLines = p0.toString()
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+        })
     }
 
     override fun onStart() {
