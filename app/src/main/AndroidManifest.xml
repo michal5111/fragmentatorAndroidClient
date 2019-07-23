@@ -3,6 +3,7 @@
           package="com.example.springfragmenterclient">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
             android:name=".Fragmentator4000"
@@ -24,6 +25,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="com.example.springfragmenterclient.fileprovider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths"/>
+        </provider>
     </application>
 
 </manifest>

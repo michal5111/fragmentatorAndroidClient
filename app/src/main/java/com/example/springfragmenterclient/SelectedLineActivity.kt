@@ -87,6 +87,4 @@ class SelectedLineActivity : AppCompatActivity() {
         )
         RequestQueueSingleton.getInstance(this.applicationContext).addToRequestQueue(snapshotRequest)
     }
-
-
 }
