@@ -13,11 +13,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.example.springfragmenterclient.Entities.Line
@@ -57,7 +55,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
     }
 
-    private fun createEventSource() : EventSource {
+    private fun createEventSource(): EventSource {
         return EventSource("$apiURL/requestFragment" +
                 "?fileName=${encodeValue(movie.fileName)}" +
                 "&line=${encodeValue(line.textLines)}" +
@@ -92,7 +90,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                         if (messageEvent.data.contains("frame=")) {
                             val offset = messageEvent.data.lastIndexOf("time=")
                             val time = messageEvent.data.substring(offset + 5, offset + 16)
-                            percent = Fragmentator4000.timeToSeconds(time)*100.0/to
+                            percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
                             conversionProgressBar.progress = percent.toInt()
                         }
                         textView.post {
@@ -149,7 +147,11 @@ class FragmentRequestActivity : AppCompatActivity() {
                                             .setAllowedOverRoaming(false)
                                             .setTitle("Fragment: " + movie.fileName)
                                             .setDescription(line.textLines)
-                                            .setDestinationInExternalPublicDir(cacheDir.absolutePath, fileName)
+                                            .setDestinationInExternalFilesDir(
+                                                this@FragmentRequestActivity,
+                                                "cache",
+                                                fileName
+                                            )
                                     )
                                 }
                             }
@@ -229,6 +231,20 @@ class FragmentRequestActivity : AppCompatActivity() {
         eventSource.close()
     }
 
+    fun shareFile(uri: Uri) {
+        val dir = File(getExternalFilesDir(null), "cache")
+        val videoFile = File(dir, uri.lastPathSegment)
+        videoFile.deleteOnExit()
+        val shareFileUri =
+            FileProvider.getUriForFile(this, "com.example.springfragmenterclient.fileprovider", videoFile)
+        val shareVideoIntent = Intent()
+        shareVideoIntent.action = Intent.ACTION_SEND
+        shareVideoIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        shareVideoIntent.setDataAndType(shareFileUri, contentResolver.getType(shareFileUri))
+        shareVideoIntent.putExtra(Intent.EXTRA_STREAM, shareFileUri)
+        startActivity(Intent.createChooser(shareVideoIntent, "LOL"))
+    }
+
     private val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             Toast.makeText(p0, "Pobieranie zakończone", Toast.LENGTH_SHORT).show()
@@ -237,28 +253,9 @@ class FragmentRequestActivity : AppCompatActivity() {
                 if (c.moveToFirst()) {
                     val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                        val movieURI = Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)))
                         lastShare = -1L
-                        val videoFile = File(cacheDir, fileName)
-                        val shareFileUri: Uri? = try {
-                            FileProvider.getUriForFile(
-                                this@FragmentRequestActivity,
-                                "com.example.springfragmenterclient.fileprovider",
-                                videoFile
-                            )
-                        } catch (e: IllegalArgumentException) {
-                            Log.e(
-                                "File Selector",
-                                "The selected file can't be shared"
-                            )
-                            null
-                        }
-                        val shareVideoIntent = ShareCompat.IntentBuilder.from(this@FragmentRequestActivity)
-                            //.setType("video/mp4")
-                            //.setStream(shareFileUri)
-                            .intent
-                        shareVideoIntent.data = shareFileUri
-                        shareVideoIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        startActivity(Intent.createChooser(shareVideoIntent, "Udostępnij"))
+                        shareFile(movieURI)
                     }
                 }
             }
