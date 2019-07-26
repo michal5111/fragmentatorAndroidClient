@@ -9,4 +9,6 @@
     <string name="search">Szukaj</string>
     <string name="select">Wybierz</string>
     <string name="share">Udostępnij</string>
+    <string name="downloadComplete">Pobieranie zakończone</string>
+    <string name="shareFragment">Udostępnij fragment</string>
 </resources>

@@ -30,8 +30,9 @@ import java.nio.charset.StandardCharsets
 
 class FragmentRequestActivity : AppCompatActivity() {
 
-    private lateinit var eventSource: EventSource
     private lateinit var movie: Movie
+    private lateinit var line: Line
+    private lateinit var eventSource: EventSource
     private lateinit var textView: TextView
     private lateinit var openButton: Button
     private lateinit var convertButton: Button
@@ -39,14 +40,12 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var shareButton: Button
     private lateinit var startOffsetEditText: EditText
     private lateinit var stopOffsetEditText: EditText
-    private lateinit var line: Line
+    private lateinit var conversionProgressBar: ProgressBar
+    private lateinit var scrollView: ScrollView
+    private lateinit var downloadManager: DownloadManager
     private var message: String = ""
     private var percent: Double = 0.0
     private var to: Double = 0.0
-    private lateinit var conversionProgressBar: ProgressBar
-    private val apiURL = "http://michal5111.asuscomm.com:8080/rest"
-    private lateinit var scrollView: ScrollView
-    private lateinit var downloadManager: DownloadManager
     private var lastDownload: Long = -1L
     private var lastShare: Long = -1L
     private lateinit var fileName: String
@@ -56,7 +55,8 @@ class FragmentRequestActivity : AppCompatActivity() {
     }
 
     private fun createEventSource(): EventSource {
-        return EventSource("$apiURL/requestFragment" +
+        return EventSource(
+            "${Fragmentator4000.apiUrl}/requestFragment" +
                 "?fileName=${encodeValue(movie.fileName)}" +
                 "&line=${encodeValue(line.textLines)}" +
                 "&timeString=${encodeValue(line.timeString)}" +
@@ -64,7 +64,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                 "&lineNumber=${line.number}" +
                 "&startOffset=${line.startOffset}" +
                 "&stopOffset=${line.stopOffset}" +
-                "&subtitlesFileName=${movie.subtitles.filename}"
+                    "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
             , object : EventHandler {
                 override fun onError(e: java.lang.Exception?) {
                     eventSource.close()
@@ -108,7 +108,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                             openButton.setOnClickListener {
                                 val openVideo = Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse("http://michal5111.asuscomm.com:8080/fragments/$fileName")
+                                    Uri.parse("${Fragmentator4000.fragmentsUrl}/$fileName")
                                 )
                                 startActivity(openVideo)
                             }
@@ -121,11 +121,11 @@ class FragmentRequestActivity : AppCompatActivity() {
                                     )
                                 } else {
                                     lastDownload = downloadManager.enqueue(
-                                        DownloadManager.Request(("http://michal5111.asuscomm.com:8080/fragments/$fileName").toUri())
+                                        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
                                             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                                             .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + movie.fileName)
-                                            .setDescription(line.textLines)
+                                            .setTitle("Fragment: " + line.textLines)
+                                            .setDescription(movie.fileName)
                                             .setDestinationInExternalPublicDir(
                                                 Environment.DIRECTORY_DOWNLOADS,
                                                 fileName
@@ -142,11 +142,11 @@ class FragmentRequestActivity : AppCompatActivity() {
                                     )
                                 } else {
                                     lastShare = downloadManager.enqueue(
-                                        DownloadManager.Request(("http://michal5111.asuscomm.com:8080/fragments/$fileName").toUri())
+                                        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
                                             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                                             .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + movie.fileName)
-                                            .setDescription(line.textLines)
+                                            .setTitle("Fragment: " + line.textLines)
+                                            .setDescription(movie.fileName)
                                             .setDestinationInExternalFilesDir(
                                                 this@FragmentRequestActivity,
                                                 "cache",
@@ -226,28 +226,24 @@ class FragmentRequestActivity : AppCompatActivity() {
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        eventSource.close()
-    }
-
     fun shareFile(uri: Uri) {
         val dir = File(getExternalFilesDir(null), "cache")
         val videoFile = File(dir, uri.lastPathSegment)
         videoFile.deleteOnExit()
         val shareFileUri =
             FileProvider.getUriForFile(this, "com.example.springfragmenterclient.fileprovider", videoFile)
-        val shareVideoIntent = Intent()
-        shareVideoIntent.action = Intent.ACTION_SEND
-        shareVideoIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        shareVideoIntent.setDataAndType(shareFileUri, contentResolver.getType(shareFileUri))
-        shareVideoIntent.putExtra(Intent.EXTRA_STREAM, shareFileUri)
-        startActivity(Intent.createChooser(shareVideoIntent, "LOL"))
+        val shareVideoIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            setDataAndType(shareFileUri, contentResolver.getType(shareFileUri))
+            putExtra(Intent.EXTRA_STREAM, shareFileUri)
+        }
+        startActivity(Intent.createChooser(shareVideoIntent, resources.getString(R.string.shareFragment)))
     }
 
     private val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            Toast.makeText(p0, "Pobieranie zakończone", Toast.LENGTH_SHORT).show()
+            Toast.makeText(p0, resources.getString(R.string.downloadComplete), Toast.LENGTH_SHORT).show()
             if (lastShare != -1L) {
                 val c: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(lastShare))
                 if (c.moveToFirst()) {
@@ -260,5 +256,11 @@ class FragmentRequestActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(onComplete)
+        eventSource.close()
     }
 }

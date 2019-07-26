@@ -70,12 +70,14 @@ class SelectedLineActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        movie = Movie()
-        movie.fileName = selectedMovie.fileName
-        movie.path = selectedMovie.path
-        movie.subtitles = Subtitles()
-        movie.subtitles.filename = selectedMovie.subtitles.filename
-        movie.subtitles.filteredLines.add(selectedLine)
+        movie = Movie().apply {
+            fileName = selectedMovie.fileName
+            path = selectedMovie.path
+            subtitles = Subtitles().apply {
+                filename = selectedMovie.subtitles.filename
+                filteredLines.add(selectedLine)
+            }
+        }
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
         val movieJsonString = gson.toJson(movie)
         val jsonObject = JSONObject(movieJsonString)

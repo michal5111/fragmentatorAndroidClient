@@ -23,8 +23,11 @@ import org.json.JSONObject
 class Fragmentator4000 : Application() {
 
     private var movies: List<Movie> = emptyList()
+
     companion object {
-        const val url = "http://michal5111.asuscomm.com:8080/rest"
+        private const val serverUrl = "http://michal5111.asuscomm.com:8080"
+        const val apiUrl = "$serverUrl/rest"
+        const val fragmentsUrl = "$serverUrl/fragments"
         val movieListType = object : TypeToken<List<Movie>>() {}.type!!
 
         fun timeToSeconds(time: String): Double {
@@ -47,8 +50,8 @@ class Fragmentator4000 : Application() {
     }
 
     fun getMoviesRequest(fraze: String, recyclerView: RecyclerView, progressBar: ProgressBar): JsonArrayRequest {
-        val jsonArrayRequest = JsonArrayRequest(
-            Request.Method.GET, "$url/search?fraze=$fraze", null,
+        return JsonArrayRequest(
+            Request.Method.GET, "$apiUrl/search?fraze=$fraze", null,
             Response.Listener { response ->
                 val gson = Gson()
                 movies = gson.fromJson(response.toString(), movieListType)
@@ -56,35 +59,43 @@ class Fragmentator4000 : Application() {
                 progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
-                Toast.makeText(applicationContext,"error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.INVISIBLE
             }
-        )
-        jsonArrayRequest.retryPolicy = DefaultRetryPolicy(
-            20000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-        return jsonArrayRequest
+        ).apply {
+            retryPolicy = DefaultRetryPolicy(
+                20000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+        }
     }
 
-    fun getSnapshotRequest(movie: JSONObject, networkImageView: NetworkImageView, imageLoader: ImageLoader, progressBar: ProgressBar) : JsonObjectRequest {
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.POST, "$url/linesnapshot", movie,
+    fun getSnapshotRequest(
+        movie: JSONObject,
+        networkImageView: NetworkImageView,
+        imageLoader: ImageLoader,
+        progressBar: ProgressBar
+    ): JsonObjectRequest {
+        return JsonObjectRequest(
+            Request.Method.POST, "$apiUrl/linesnapshot", movie,
             Response.Listener { response ->
                 val gson = Gson()
-                val json = gson.fromJson(response.toString(), com.example.springfragmenterclient.Entities.Response::class.java)
-                networkImageView.setImageUrl(json.url,imageLoader)
+                val json =
+                    gson.fromJson(response.toString(), com.example.springfragmenterclient.Entities.Response::class.java)
+                networkImageView.setImageUrl(json.url, imageLoader)
                 progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
                 progressBar.visibility = View.INVISIBLE
-                Toast.makeText(applicationContext,"error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
             }
-        )
-        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-            1000,
-            20,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-        return jsonObjectRequest
+        ).apply {
+            retryPolicy = DefaultRetryPolicy(
+                1000,
+                20,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+        }
     }
 }
