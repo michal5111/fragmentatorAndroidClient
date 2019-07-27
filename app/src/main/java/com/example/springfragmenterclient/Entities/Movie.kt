@@ -11,5 +11,9 @@ class Movie : Serializable {
     var fileName: String = ""
     @Expose
     var path: String = ""
+    @Expose
+    var startOffset: Double = 0.0
+    @Expose
+    var stopOffset: Double = 0.0
 
 }

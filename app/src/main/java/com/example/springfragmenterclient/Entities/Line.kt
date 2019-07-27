@@ -12,9 +12,5 @@ class Line : Serializable {
     var timeString: String = ""
     @Expose
     var textLines: String = ""
-    @Expose
-    var startOffset: Double = 0.0
-    @Expose
-    var stopOffset: Double = 0.0
     var parent: Movie? = null
 }

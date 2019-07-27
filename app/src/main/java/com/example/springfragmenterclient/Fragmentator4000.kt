@@ -26,7 +26,7 @@ class Fragmentator4000 : Application() {
 
     companion object {
         private const val serverUrl = "http://michal5111.asuscomm.com:8080"
-        const val apiUrl = "$serverUrl/rest"
+        const val apiUrl = "$serverUrl/api"
         const val fragmentsUrl = "$serverUrl/fragments"
         val movieListType = object : TypeToken<List<Movie>>() {}.type!!
 

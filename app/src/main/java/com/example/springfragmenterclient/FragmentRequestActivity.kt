@@ -62,8 +62,8 @@ class FragmentRequestActivity : AppCompatActivity() {
                 "&timeString=${encodeValue(line.timeString)}" +
                 "&path=${encodeValue(movie.path)}" +
                 "&lineNumber=${line.number}" +
-                "&startOffset=${line.startOffset}" +
-                "&stopOffset=${line.stopOffset}" +
+                "&startOffset=${movie.startOffset}" +
+                "&stopOffset=${movie.stopOffset}" +
                     "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
             , object : EventHandler {
                 override fun onError(e: java.lang.Exception?) {
@@ -182,9 +182,9 @@ class FragmentRequestActivity : AppCompatActivity() {
         startOffsetEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 try {
-                    line.startOffset = p0.toString().toDouble()
+                    movie.startOffset = p0.toString().toDouble()
                 } catch (e: Exception) {
-                    line.startOffset = 0.0
+                    movie.startOffset = 0.0
                 }
             }
 
@@ -200,9 +200,9 @@ class FragmentRequestActivity : AppCompatActivity() {
         stopOffsetEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 try {
-                    line.stopOffset = p0.toString().toDouble()
+                    movie.stopOffset = p0.toString().toDouble()
                 } catch (e: Exception) {
-                    line.stopOffset = 0.0
+                    movie.stopOffset = 0.0
                 }
             }
 
@@ -228,8 +228,7 @@ class FragmentRequestActivity : AppCompatActivity() {
 
     fun shareFile(uri: Uri) {
         val dir = File(getExternalFilesDir(null), "cache")
-        val videoFile = File(dir, uri.lastPathSegment)
-        videoFile.deleteOnExit()
+        val videoFile = File(dir, uri.lastPathSegment).apply { deleteOnExit() }
         val shareFileUri =
             FileProvider.getUriForFile(this, "com.example.springfragmenterclient.fileprovider", videoFile)
         val shareVideoIntent = Intent().apply {
