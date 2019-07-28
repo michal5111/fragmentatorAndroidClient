@@ -11,4 +11,7 @@
     <string name="share">Udostępnij</string>
     <string name="downloadComplete">Pobieranie zakończone</string>
     <string name="shareFragment">Udostępnij fragment</string>
+    <string name="tab1Name">Fragment</string>
+    <string name="tab2Name">Dialog</string>
+    <string name="typeMovieTitle">Wpisz tytuł filmu</string>
 </resources>

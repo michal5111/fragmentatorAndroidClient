@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Entities.Line
@@ -14,6 +15,7 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val timeTextView: TextView = v.findViewById(R.id.TimeTextView)
         val lineTextView: TextView = v.findViewById(R.id.LineTextView)
+        val cardView: CardView = v.findViewById(R.id.CardView)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -23,13 +25,12 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.timeTextView.text = dataSet[position].timeString
-        viewHolder.lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
-        viewHolder.lineTextView.setOnClickListener {
-            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent!!,dataSet[position])
-        }
-        viewHolder.timeTextView.setOnClickListener {
-            (viewHolder.lineTextView.context as MainActivity).selectMovie(dataSet[position].parent!!,dataSet[position])
+        viewHolder.apply {
+            timeTextView.text = dataSet[position].timeString
+            lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
+            cardView.setOnClickListener {
+                (this.lineTextView.context as MainActivity).selectLine(dataSet[position].parent!!,dataSet[position])
+            }
         }
     }
     override fun getItemCount() = dataSet.size

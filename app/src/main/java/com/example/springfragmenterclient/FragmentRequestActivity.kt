@@ -18,20 +18,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.Fragmentator4000.Companion.encodeValue
 import com.star_zero.sse.EventHandler
 import com.star_zero.sse.EventSource
 import com.star_zero.sse.MessageEvent
 import java.io.File
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 
 class FragmentRequestActivity : AppCompatActivity() {
 
     private lateinit var movie: Movie
-    private lateinit var line: Line
+    //private lateinit var line: Line
     private lateinit var eventSource: EventSource
     private lateinit var textView: TextView
     private lateinit var openButton: Button
@@ -49,22 +47,23 @@ class FragmentRequestActivity : AppCompatActivity() {
     private var lastDownload: Long = -1L
     private var lastShare: Long = -1L
     private lateinit var fileName: String
-
-    private fun encodeValue(value: String): String {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
-    }
+    private lateinit var endpoint: String
 
     private fun createEventSource(): EventSource {
-        return EventSource(
-            "${Fragmentator4000.apiUrl}/requestFragment" +
-                "?fileName=${encodeValue(movie.fileName)}" +
+        var adress: String = "$endpoint?fileName=${encodeValue(movie.fileName)}&path=${encodeValue(movie.path)}"
+        for (line in movie.subtitles.filteredLines) {
+            adress = adress.plus(
                 "&line=${encodeValue(line.textLines)}" +
-                "&timeString=${encodeValue(line.timeString)}" +
-                "&path=${encodeValue(movie.path)}" +
-                "&lineNumber=${line.number}" +
-                "&startOffset=${movie.startOffset}" +
+                        "&timeString=${encodeValue(line.timeString)}" +
+                        "&lineNumber=${line.number}"
+            )
+        }
+        adress = adress.plus( "&startOffset=${movie.startOffset}" +
                 "&stopOffset=${movie.stopOffset}" +
-                    "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
+                "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}")
+        println(adress)
+        return EventSource(
+            adress
             , object : EventHandler {
                 override fun onError(e: java.lang.Exception?) {
                     eventSource.close()
@@ -124,7 +123,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                                         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
                                             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                                             .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + line.textLines)
+                                            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
                                             .setDescription(movie.fileName)
                                             .setDestinationInExternalPublicDir(
                                                 Environment.DIRECTORY_DOWNLOADS,
@@ -145,7 +144,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                                         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
                                             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                                             .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + line.textLines)
+                                            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
                                             .setDescription(movie.fileName)
                                             .setDestinationInExternalFilesDir(
                                                 this@FragmentRequestActivity,
@@ -169,7 +168,8 @@ class FragmentRequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment_request)
         movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-        line = movie.subtitles.filteredLines[0]
+        endpoint = intent.getSerializableExtra("ENDPOINT") as String
+        //line = movie.subtitles.filteredLines[0]
         textView = findViewById(R.id.EventTextView)
         openButton = findViewById(R.id.OpenButton)
         downloadButton = findViewById(R.id.DownloadButton)

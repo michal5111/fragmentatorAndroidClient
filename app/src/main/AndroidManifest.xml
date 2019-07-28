@@ -15,11 +15,15 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".SelectedMovie">
+        </activity>
         <activity android:name=".FragmentRequestActivity">
         </activity>
         <activity android:name=".SelectedLineActivity">
         </activity>
-        <activity android:name=".MainActivity">
+        <activity
+                android:name=".MainActivity"
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -30,8 +34,8 @@
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="com.example.springfragmenterclient.fileprovider"
-                android:grantUriPermissions="true"
-                android:exported="false">
+                android:exported="false"
+                android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/filepaths"/>

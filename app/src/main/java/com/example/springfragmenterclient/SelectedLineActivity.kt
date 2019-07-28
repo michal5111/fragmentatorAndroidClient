@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.toolbox.ImageLoader
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.Entities.Response
 import com.example.springfragmenterclient.Entities.Subtitles
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -50,6 +53,7 @@ class SelectedLineActivity : AppCompatActivity() {
         downloadButton.setOnClickListener {
             val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE",movie)
+                putExtra("ENDPOINT", "${Fragmentator4000.apiUrl}/requestFragment")
             }
             startActivity(intent)
         }
@@ -81,12 +85,36 @@ class SelectedLineActivity : AppCompatActivity() {
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
         val movieJsonString = gson.toJson(movie)
         val jsonObject = JSONObject(movieJsonString)
-        val snapshotRequest = (this.applicationContext as Fragmentator4000).getSnapshotRequest(
+        val snapshotRequest = getSnapshotRequest(
             jsonObject,
-            imageView,
-            RequestQueueSingleton.getInstance(this.applicationContext).imageLoader,
-            progressBar
+            RequestQueueSingleton.getInstance(this).imageLoader
         )
-        RequestQueueSingleton.getInstance(this.applicationContext).addToRequestQueue(snapshotRequest)
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(snapshotRequest)
+    }
+
+    private fun getSnapshotRequest(
+        movie: JSONObject,
+        imageLoader: ImageLoader
+    ): JsonObjectRequest {
+        return JsonObjectRequest(
+            Request.Method.POST, "${Fragmentator4000.apiUrl}/linesnapshot", movie,
+            com.android.volley.Response.Listener { response ->
+                val gson = Gson()
+                val json =
+                    gson.fromJson(response.toString(), Response::class.java)
+                imageView.setImageUrl(json.url, imageLoader)
+                progressBar.visibility = View.INVISIBLE
+            },
+            com.android.volley.Response.ErrorListener { error ->
+                progressBar.visibility = View.INVISIBLE
+                Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+        ).apply {
+            retryPolicy = DefaultRetryPolicy(
+                1000,
+                20,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+        }
     }
 }

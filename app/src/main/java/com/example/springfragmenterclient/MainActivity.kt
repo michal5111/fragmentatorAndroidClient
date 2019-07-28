@@ -2,47 +2,37 @@ package com.example.springfragmenterclient
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
-import com.google.android.material.textfield.TextInputEditText
+import com.example.springfragmenterclient.fragments.SectionsPagerAdapter
+import com.google.android.material.tabs.TabLayout
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        val applicationContext = applicationContext as Fragmentator4000
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val searchButton = findViewById<Button>(R.id.SearchButton)
-        val frazeInput = findViewById<TextInputEditText>(R.id.FrazeInput)
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar3)
-        val recyclerView = findViewById<RecyclerView>(R.id.RecyclerView)
-        val viewManager = LinearLayoutManager(this)
-        recyclerView.layoutManager = viewManager
-
-
-        searchButton.setOnClickListener {
-            Fragmentator4000.hideKeyboard(this)
-            progressBar.visibility = View.VISIBLE
-            RequestQueueSingleton.getInstance(this)
-                .addToRequestQueue(
-                    applicationContext.getMoviesRequest(frazeInput.text.toString(),recyclerView, progressBar))
-        }
+        val selectionPagerAdapter = SectionsPagerAdapter(this,supportFragmentManager)
+        val viewPager: ViewPager = findViewById(R.id.view_pager)
+        viewPager.adapter = selectionPagerAdapter
+        val tabs: TabLayout = findViewById(R.id.tabs)
+        tabs.setupWithViewPager(viewPager)
     }
 
-    fun selectMovie(movie: Movie, line: Line) {
-        val intent = Intent(applicationContext,SelectedLineActivity::class.java).apply {
+    fun selectLine(movie: Movie, line: Line) {
+        val intent = Intent(this, SelectedLineActivity::class.java).apply {
             putExtra("SELECTED_MOVIE",movie)
             putExtra("SELECTED_LINE",line)
         }
         startActivity(intent)
     }
 
+    fun selectMovie(movie: Movie) {
+        val intent = Intent(this, SelectedMovie::class.java).apply {
+            putExtra("SELECTED_MOVIE",movie)
+        }
+        startActivity(intent)
+    }
 }

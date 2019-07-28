@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient.Entities;
+package com.example.springfragmenterclient.utils;
 
 import android.graphics.Bitmap;
 import android.util.LruCache;
