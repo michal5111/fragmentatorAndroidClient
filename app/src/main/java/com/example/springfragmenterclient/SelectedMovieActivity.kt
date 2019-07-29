@@ -15,8 +15,9 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
 import com.google.gson.Gson
+import org.json.JSONArray
 
-class SelectedMovie : AppCompatActivity() {
+class SelectedMovieActivity : AppCompatActivity() {
 
     private lateinit var selectedMovie: Movie
     private lateinit var lines: List<Line>
@@ -36,39 +37,26 @@ class SelectedMovie : AppCompatActivity() {
         //recyclerView.adapter = LineRecyclerViewAdapter(selectedMovie.subtitles.filteredLines)
         RequestQueueSingleton.getInstance(this)
             .addToRequestQueue(
-                getLines(Fragmentator4000.encodeValue("${selectedMovie.path}/${selectedMovie.subtitles.filename}")))
+                getLines(
+                    Fragmentator4000
+                        .encodeValue("${selectedMovie.path}/${selectedMovie.subtitles.filename}")
+                )
+            )
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE",selectedMovie)
-                putExtra("ENDPOINT", "${Fragmentator4000.apiUrl}/dialog")
+                putExtra("ENDPOINT", "/dialog")
             }
             startActivity(intent)
         }
     }
 
-    fun getLines(fileName: String): JsonArrayRequest {
+    private fun getLines(fileName: String): JsonArrayRequest {
         return JsonArrayRequest(
             Request.Method.GET, "${Fragmentator4000.apiUrl}/subtitles?fileName=$fileName", null,
-            Response.Listener { response ->
-                val gson = Gson()
-                lines = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
-                recyclerView.adapter = DialogLineRecyclerViewAdapter(lines).apply {
-                    setOnLinesSelectedListener {
-                        if (selectedItems.size() >= 2) {
-                            selectButton.isEnabled = true
-                            selectedMovie.subtitles.filteredLines = lines.filter {
-                                selectedItems.get(lines.lastIndexOf(it), false)
-                            }.toMutableList()
-                        } else {
-                            selectButton.isEnabled = false
-                        }
-                    }
-                }
-                //progressBar.visibility = View.INVISIBLE
-            },
+            Response.Listener { response -> onResponseListener(response) },
             Response.ErrorListener { error ->
                 Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-                //progressBar.visibility = View.INVISIBLE
             }
         ).apply {
             retryPolicy = DefaultRetryPolicy(
@@ -76,6 +64,35 @@ class SelectedMovie : AppCompatActivity() {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             )
+        }
+    }
+
+    private fun onLinesSelectedListener(adapter: DialogLineRecyclerViewAdapter) {
+        if (adapter.selectedItems.size() >= 2) {
+            selectButton.isEnabled = true
+            selectedMovie.subtitles.filteredLines = lines.filter {
+                adapter.selectedItems.get(lines.lastIndexOf(it), false)
+            }.toMutableList()
+        } else {
+            selectButton.isEnabled = false
+        }
+    }
+
+    private fun onResponseListener(response: JSONArray) {
+        val gson = Gson()
+        lines = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
+        recyclerView.adapter = DialogLineRecyclerViewAdapter(lines).apply {
+            setOnLinesSelectedListener { adapter -> onLinesSelectedListener(adapter) }
+        }
+        if (intent.hasExtra("POSITION")) {
+            val position: Int = intent.getIntExtra("POSITION", 0)
+            recyclerView.apply {
+                scrollToPosition(position)
+                (adapter as DialogLineRecyclerViewAdapter).apply {
+                    selectedItems.put(position, true)
+                    notifyDataSetChanged()
+                }
+            }
         }
     }
 }

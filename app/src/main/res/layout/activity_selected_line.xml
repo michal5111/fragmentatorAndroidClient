@@ -100,4 +100,17 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintVertical_bias="1.0"/>
+
+    <Button
+            style="?buttonBarButtonStyle"
+            android:text="@string/tab2Name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/Dialog"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/SelectedLineDownloadButton"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

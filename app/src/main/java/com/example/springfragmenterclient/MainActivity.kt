@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun selectMovie(movie: Movie) {
-        val intent = Intent(this, SelectedMovie::class.java).apply {
+        val intent = Intent(this, SelectedMovieActivity::class.java).apply {
             putExtra("SELECTED_MOVIE",movie)
         }
         startActivity(intent)

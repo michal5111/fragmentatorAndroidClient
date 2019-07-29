@@ -14,4 +14,5 @@
     <string name="tab1Name">Fragment</string>
     <string name="tab2Name">Dialog</string>
     <string name="typeMovieTitle">Wpisz tytuł filmu</string>
+    <string name="error">Błąd: %1$s</string>
 </resources>

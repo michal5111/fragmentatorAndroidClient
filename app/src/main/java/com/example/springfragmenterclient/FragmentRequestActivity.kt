@@ -29,7 +29,6 @@ import java.io.File
 class FragmentRequestActivity : AppCompatActivity() {
 
     private lateinit var movie: Movie
-    //private lateinit var line: Line
     private lateinit var eventSource: EventSource
     private lateinit var textView: TextView
     private lateinit var openButton: Button
@@ -49,127 +48,11 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var fileName: String
     private lateinit var endpoint: String
 
-    private fun createEventSource(): EventSource {
-        var adress: String = "$endpoint?fileName=${encodeValue(movie.fileName)}&path=${encodeValue(movie.path)}"
-        for (line in movie.subtitles.filteredLines) {
-            adress = adress.plus(
-                "&line=${encodeValue(line.textLines)}" +
-                        "&timeString=${encodeValue(line.timeString)}" +
-                        "&lineNumber=${line.number}"
-            )
-        }
-        adress = adress.plus( "&startOffset=${movie.startOffset}" +
-                "&stopOffset=${movie.stopOffset}" +
-                "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}")
-        println(adress)
-        return EventSource(
-            adress
-            , object : EventHandler {
-                override fun onError(e: java.lang.Exception?) {
-                    eventSource.close()
-                    textView.post { textView.text = "error " + e.toString() }
-                }
-
-                override fun onOpen() {
-                    message = ""
-                    textView.post {
-                        textView.text = message
-                    }
-                }
-
-                override fun onMessage(messageEvent: MessageEvent) {
-                    if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
-                        return
-                    }
-                    message = message.plus(messageEvent.data).plus("\n")
-                    if (messageEvent.event.equals("to")) {
-                        to = messageEvent.data.toDouble()
-                    }
-                    if (messageEvent.event.equals("log")) {
-                        if (messageEvent.data.contains("frame=")) {
-                            val offset = messageEvent.data.lastIndexOf("time=")
-                            val time = messageEvent.data.substring(offset + 5, offset + 16)
-                            percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
-                            conversionProgressBar.progress = percent.toInt()
-                        }
-                        textView.post {
-                            textView.text = message
-                        }
-                        scrollView.post {
-                            scrollView.fullScroll(ScrollView.FOCUS_DOWN)
-                        }
-                    }
-                    if (messageEvent.event.equals("complete")) {
-                        fileName = messageEvent.data
-                        eventSource.close()
-                        conversionProgressBar.progress = 100
-                        openButton.post {
-                            openButton.setOnClickListener {
-                                val openVideo = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("${Fragmentator4000.fragmentsUrl}/$fileName")
-                                )
-                                startActivity(openVideo)
-                            }
-                            downloadButton.setOnClickListener {
-                                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(
-                                        this@FragmentRequestActivity,
-                                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                                        1
-                                    )
-                                } else {
-                                    lastDownload = downloadManager.enqueue(
-                                        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
-                                            .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-                                            .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
-                                            .setDescription(movie.fileName)
-                                            .setDestinationInExternalPublicDir(
-                                                Environment.DIRECTORY_DOWNLOADS,
-                                                fileName
-                                            )
-                                    )
-                                }
-                            }
-                            shareButton.setOnClickListener {
-                                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(
-                                        this@FragmentRequestActivity,
-                                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                                        1
-                                    )
-                                } else {
-                                    lastShare = downloadManager.enqueue(
-                                        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
-                                            .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-                                            .setAllowedOverRoaming(false)
-                                            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
-                                            .setDescription(movie.fileName)
-                                            .setDestinationInExternalFilesDir(
-                                                this@FragmentRequestActivity,
-                                                "cache",
-                                                fileName
-                                            )
-                                    )
-                                }
-                            }
-                            convertButton.isEnabled = true
-                            openButton.isEnabled = true
-                            downloadButton.isEnabled = true
-                            shareButton.isEnabled = true
-                        }
-                    }
-                }
-            })
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment_request)
         movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-        endpoint = intent.getSerializableExtra("ENDPOINT") as String
-        //line = movie.subtitles.filteredLines[0]
+        endpoint = intent.getStringExtra("ENDPOINT")!!
         textView = findViewById(R.id.EventTextView)
         openButton = findViewById(R.id.OpenButton)
         downloadButton = findViewById(R.id.DownloadButton)
@@ -228,7 +111,7 @@ class FragmentRequestActivity : AppCompatActivity() {
 
     fun shareFile(uri: Uri) {
         val dir = File(getExternalFilesDir(null), "cache")
-        val videoFile = File(dir, uri.lastPathSegment).apply { deleteOnExit() }
+        val videoFile = File(dir, uri.lastPathSegment!!).apply { deleteOnExit() }
         val shareFileUri =
             FileProvider.getUriForFile(this, "com.example.springfragmenterclient.fileprovider", videoFile)
         val shareVideoIntent = Intent().apply {
@@ -261,5 +144,142 @@ class FragmentRequestActivity : AppCompatActivity() {
         super.onDestroy()
         unregisterReceiver(onComplete)
         eventSource.close()
+    }
+
+    private fun downloadManagerEnqueueForSharing(fileName: String) = downloadManager.enqueue(
+        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
+            .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            .setAllowedOverRoaming(false)
+            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
+            .setDescription(movie.fileName)
+            .setDestinationInExternalFilesDir(
+                this@FragmentRequestActivity,
+                "cache",
+                fileName
+            )
+    )
+
+    private fun downloadManagerEnqueueForDownload(fileName: String) = downloadManager.enqueue(
+        DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
+            .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            .setAllowedOverRoaming(false)
+            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
+            .setDescription(movie.fileName)
+            .setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                fileName
+            )
+    )
+
+    private fun openButtonOnClickListener(fileName: String) {
+        val openVideo = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("${Fragmentator4000.fragmentsUrl}/$fileName")
+        )
+        startActivity(openVideo)
+    }
+
+    private fun downloadButtonOnClickListener(fileName: String) {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this@FragmentRequestActivity,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                1
+            )
+        } else {
+            lastDownload = downloadManagerEnqueueForDownload(fileName)
+        }
+    }
+
+    private fun shareButtonOnClickListener(fileName: String) {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this@FragmentRequestActivity,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                2
+            )
+        } else {
+            lastShare = downloadManagerEnqueueForSharing(fileName)
+        }
+    }
+
+    private fun createEventSource(): EventSource {
+        var adress = "${Fragmentator4000.apiUrl}$endpoint?fileName=${encodeValue(movie.fileName)}" +
+                "&path=${encodeValue(movie.path)}"
+        for (line in movie.subtitles.filteredLines) {
+            adress = adress.plus(
+                "&line=${encodeValue(line.textLines)}" +
+                        "&timeString=${encodeValue(line.timeString)}" +
+                        "&lineNumber=${line.number}"
+            )
+        }
+        adress = adress.plus(
+            "&startOffset=${movie.startOffset}" +
+                    "&stopOffset=${movie.stopOffset}" +
+                    "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
+        )
+        return EventSource(
+            adress,
+            object : EventHandler {
+                override fun onError(e: java.lang.Exception?) {
+                    eventSource.close()
+                    textView.post { textView.text = resources.getString(R.string.error, e.toString()) }
+                }
+
+                override fun onOpen() {
+                    message = ""
+                    textView.post { textView.text = message }
+                }
+
+                override fun onMessage(messageEvent: MessageEvent) {
+                    if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
+                        return
+                    }
+                    message = message.plus(messageEvent.data).plus("\n")
+                    if (messageEvent.event.equals("to")) {
+                        to = messageEvent.data.toDouble()
+                    }
+                    if (messageEvent.event.equals("log")) {
+                        if (messageEvent.data.contains("frame=")) {
+                            val offset = messageEvent.data.lastIndexOf("time=")
+                            val time = messageEvent.data.substring(offset + 5, offset + 16)
+                            percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
+                            conversionProgressBar.progress = percent.toInt()
+                        }
+                        textView.post { textView.text = message }
+                        scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+                    }
+                    if (messageEvent.event.equals("complete")) {
+                        fileName = messageEvent.data
+                        eventSource.close()
+                        conversionProgressBar.progress = 100
+                        openButton.post {
+                            openButton.setOnClickListener { openButtonOnClickListener(fileName) }
+                            downloadButton.setOnClickListener { downloadButtonOnClickListener(fileName) }
+                            shareButton.setOnClickListener { shareButtonOnClickListener(fileName) }
+                            convertButton.isEnabled = true
+                            openButton.isEnabled = true
+                            downloadButton.isEnabled = true
+                            shareButton.isEnabled = true
+                        }
+                    }
+                }
+            })
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    downloadManagerEnqueueForDownload(fileName)
+                }
+            }
+            2 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    downloadManagerEnqueueForSharing(fileName)
+                }
+            }
+        }
     }
 }

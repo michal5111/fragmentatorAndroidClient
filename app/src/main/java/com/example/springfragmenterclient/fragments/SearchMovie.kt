@@ -15,10 +15,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.example.springfragmenterclient.Fragmentator4000
-import com.example.springfragmenterclient.MovieRecyclerViewAdapter
-import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.RequestQueueSingleton
+import com.example.springfragmenterclient.*
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 
@@ -46,7 +43,7 @@ class SearchMovie : Fragment() {
 
 
         searchButton.setOnClickListener {
-            //Fragmentator4000.hideKeyboard(activity)
+            Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
             RequestQueueSingleton.getInstance(context!!)
                 .addToRequestQueue(

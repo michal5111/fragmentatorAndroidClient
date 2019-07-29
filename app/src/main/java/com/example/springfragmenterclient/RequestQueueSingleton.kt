@@ -23,7 +23,7 @@ class RequestQueueSingleton constructor(context: Context) {
             LruBitmapCache()
         )
     }
-    val requestQueue: RequestQueue by lazy {
+    private val requestQueue: RequestQueue by lazy {
         Volley.newRequestQueue(context.applicationContext)
     }
     fun <T> addToRequestQueue(req: Request<T>) {

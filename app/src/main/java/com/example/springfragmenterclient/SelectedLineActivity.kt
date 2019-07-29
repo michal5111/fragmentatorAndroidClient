@@ -53,7 +53,7 @@ class SelectedLineActivity : AppCompatActivity() {
         downloadButton.setOnClickListener {
             val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE",movie)
-                putExtra("ENDPOINT", "${Fragmentator4000.apiUrl}/requestFragment")
+                putExtra("ENDPOINT", "/requestFragment")
             }
             startActivity(intent)
         }
@@ -70,6 +70,14 @@ class SelectedLineActivity : AppCompatActivity() {
 
             }
         })
+        val dialogButton: Button = findViewById(R.id.Dialog)
+        dialogButton.setOnClickListener {
+            val intent = Intent(applicationContext, SelectedMovieActivity::class.java).apply {
+                putExtra("SELECTED_MOVIE", movie)
+                putExtra("POSITION", selectedLine.number - 1)
+            }
+            startActivity(intent)
+        }
     }
 
     override fun onStart() {

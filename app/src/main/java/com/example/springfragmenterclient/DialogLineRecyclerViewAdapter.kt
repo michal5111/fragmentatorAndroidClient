@@ -17,8 +17,7 @@ class DialogLineRecyclerViewAdapter(private val dataSet: List<Line>) :
     RecyclerView.Adapter<DialogLineRecyclerViewAdapter.ViewHolder>() {
 
     val selectedItems: SparseBooleanArray = SparseBooleanArray()
-    private lateinit var recyclerView: RecyclerView
-    private var dataSelectedListener: (()->Unit)? = null
+    private var dataSelectedListener: ((adapter: DialogLineRecyclerViewAdapter) -> Unit)? = null
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val timeTextView: TextView = v.findViewById(R.id.TimeTextView)
@@ -42,19 +41,18 @@ class DialogLineRecyclerViewAdapter(private val dataSet: List<Line>) :
             }
             cardView.setOnClickListener {
                 if (selectedItems.get(position, false)) {
-                    for (i in selectedItems.keyAt(position)..selectedItems.keyAt(selectedItems.size() - 1)) {
+                    for (i in position until position + selectedItems.size()) {
                         selectedItems.delete(i)
                     }
 
                 } else {
                     selectedItems.put(position, true)
-                    cardView.setCardBackgroundColor(ContextCompat.getColor(cardView.context, R.color.colorPrimary))
                     for (i in selectedItems.keyAt(0)..selectedItems.keyAt(selectedItems.size() - 1)) {
                         selectedItems.put(i, true)
                     }
                 }
                 notifyDataSetChanged()
-                dataSelectedListener?.invoke()
+                dataSelectedListener?.invoke(this@DialogLineRecyclerViewAdapter)
             }
         }
         if (selectedItems.get(position,false)) {
@@ -66,12 +64,7 @@ class DialogLineRecyclerViewAdapter(private val dataSet: List<Line>) :
 
     override fun getItemCount() = dataSet.size
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
-    }
-
-    fun setOnLinesSelectedListener(onLinesSelectedListener: ()->Unit) {
+    fun setOnLinesSelectedListener(onLinesSelectedListener: (adapter: DialogLineRecyclerViewAdapter) -> Unit) {
         dataSelectedListener = onLinesSelectedListener
     }
 }
