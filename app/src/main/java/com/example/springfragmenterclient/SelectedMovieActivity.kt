@@ -34,7 +34,6 @@ class SelectedMovieActivity : AppCompatActivity() {
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        //recyclerView.adapter = LineRecyclerViewAdapter(selectedMovie.subtitles.filteredLines)
         RequestQueueSingleton.getInstance(this)
             .addToRequestQueue(
                 getLines(
@@ -43,28 +42,26 @@ class SelectedMovieActivity : AppCompatActivity() {
                 )
             )
         selectButton.setOnClickListener {
-            val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE",selectedMovie)
+            val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
+                putExtra("SELECTED_MOVIE", selectedMovie)
                 putExtra("ENDPOINT", "/dialog")
             }
             startActivity(intent)
         }
     }
 
-    private fun getLines(fileName: String): JsonArrayRequest {
-        return JsonArrayRequest(
-            Request.Method.GET, "${Fragmentator4000.apiUrl}/subtitles?fileName=$fileName", null,
-            Response.Listener { response -> onResponseListener(response) },
-            Response.ErrorListener { error ->
-                Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-            }
-        ).apply {
-            retryPolicy = DefaultRetryPolicy(
-                20000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
+    private fun getLines(fileName: String) = JsonArrayRequest(
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/subtitles?fileName=$fileName", null,
+        Response.Listener { response -> onResponseListener(response) },
+        Response.ErrorListener { error ->
+            Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
         }
+    ).apply {
+        retryPolicy = DefaultRetryPolicy(
+            20000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
     }
 
     private fun onLinesSelectedListener(adapter: DialogLineRecyclerViewAdapter) {

@@ -40,8 +40,6 @@ class SearchFraze : Fragment() {
         recyclerView = root.findViewById(R.id.RecyclerView)
         val viewManager = LinearLayoutManager(context)
         recyclerView.layoutManager = viewManager
-
-
         searchButton.setOnClickListener {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
@@ -58,8 +56,7 @@ class SearchFraze : Fragment() {
             .apply { applicationContext = activity?.applicationContext as Fragmentator4000 }
     }
 
-    private fun getMoviesByFrazeRequest(fraze: String): JsonArrayRequest {
-        return JsonArrayRequest(
+    private fun getMoviesByFrazeRequest(fraze: String) = JsonArrayRequest(
             Request.Method.GET, "${Fragmentator4000.apiUrl}/searchFraze?fraze=$fraze", null,
             Response.Listener { response ->
                 val gson = Gson()
@@ -78,5 +75,4 @@ class SearchFraze : Fragment() {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             )
         }
-    }
 }

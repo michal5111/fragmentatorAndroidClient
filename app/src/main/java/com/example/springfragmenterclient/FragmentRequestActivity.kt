@@ -62,42 +62,8 @@ class FragmentRequestActivity : AppCompatActivity() {
         startOffsetEditText = findViewById(R.id.startOffsetEditText)
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
         shareButton = findViewById(R.id.ShareButton)
-        startOffsetEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-                try {
-                    movie.startOffset = p0.toString().toDouble()
-                } catch (e: Exception) {
-                    movie.startOffset = 0.0
-                }
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                openButton.isEnabled = false
-                downloadButton.isEnabled = false
-                shareButton.isEnabled = false
-            }
-        })
-        stopOffsetEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-                try {
-                    movie.stopOffset = p0.toString().toDouble()
-                } catch (e: Exception) {
-                    movie.stopOffset = 0.0
-                }
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                openButton.isEnabled = false
-                downloadButton.isEnabled = false
-                shareButton.isEnabled = false
-            }
-        })
+        startOffsetEditText.addTextChangedListener(startOffsetTextWatcher)
+        stopOffsetEditText.addTextChangedListener(stopOffsetTextWatcher)
         eventSource = createEventSource()
         convertButton.setOnClickListener {
             conversionProgressBar.progress = 0
@@ -280,6 +246,44 @@ class FragmentRequestActivity : AppCompatActivity() {
                     downloadManagerEnqueueForSharing(fileName)
                 }
             }
+        }
+    }
+
+    private val stopOffsetTextWatcher = object : TextWatcher {
+        override fun afterTextChanged(p0: Editable?) {
+            try {
+                movie.stopOffset = p0.toString().toDouble()
+            } catch (e: Exception) {
+                movie.stopOffset = 0.0
+            }
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            openButton.isEnabled = false
+            downloadButton.isEnabled = false
+            shareButton.isEnabled = false
+        }
+    }
+
+    private val startOffsetTextWatcher = object : TextWatcher {
+        override fun afterTextChanged(p0: Editable?) {
+            try {
+                movie.startOffset = p0.toString().toDouble()
+            } catch (e: Exception) {
+                movie.startOffset = 0.0
+            }
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            openButton.isEnabled = false
+            downloadButton.isEnabled = false
+            shareButton.isEnabled = false
         }
     }
 }

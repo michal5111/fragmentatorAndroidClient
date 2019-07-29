@@ -51,25 +51,14 @@ class SelectedLineActivity : AppCompatActivity() {
         textView.text = HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
         downloadButton.setOnClickListener {
-            val intent = Intent(applicationContext,FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE",movie)
+            val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
+                putExtra("SELECTED_MOVIE", movie)
                 putExtra("ENDPOINT", "/requestFragment")
             }
             startActivity(intent)
         }
         editText.setText(HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY))
-        editText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-                selectedLine.textLines = p0.toString()
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-        })
+        editText.addTextChangedListener(editTextTextWatcher)
         val dialogButton: Button = findViewById(R.id.Dialog)
         dialogButton.setOnClickListener {
             val intent = Intent(applicationContext, SelectedMovieActivity::class.java).apply {
@@ -103,26 +92,37 @@ class SelectedLineActivity : AppCompatActivity() {
     private fun getSnapshotRequest(
         movie: JSONObject,
         imageLoader: ImageLoader
-    ): JsonObjectRequest {
-        return JsonObjectRequest(
-            Request.Method.POST, "${Fragmentator4000.apiUrl}/linesnapshot", movie,
-            com.android.volley.Response.Listener { response ->
-                val gson = Gson()
-                val json =
-                    gson.fromJson(response.toString(), Response::class.java)
-                imageView.setImageUrl(json.url, imageLoader)
-                progressBar.visibility = View.INVISIBLE
-            },
-            com.android.volley.Response.ErrorListener { error ->
-                progressBar.visibility = View.INVISIBLE
-                Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-            }
-        ).apply {
-            retryPolicy = DefaultRetryPolicy(
-                1000,
-                20,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
+    ) = JsonObjectRequest(
+        Request.Method.POST, "${Fragmentator4000.apiUrl}/linesnapshot", movie,
+        com.android.volley.Response.Listener { response ->
+            val gson = Gson()
+            val json =
+                gson.fromJson(response.toString(), Response::class.java)
+            imageView.setImageUrl(json.url, imageLoader)
+            progressBar.visibility = View.INVISIBLE
+        },
+        com.android.volley.Response.ErrorListener { error ->
+            progressBar.visibility = View.INVISIBLE
+            Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+        }
+    ).apply {
+        retryPolicy = DefaultRetryPolicy(
+            1000,
+            20,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+    }
+
+    private val editTextTextWatcher = object : TextWatcher {
+        override fun afterTextChanged(p0: Editable?) {
+            selectedLine.textLines = p0.toString()
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
         }
     }
 }

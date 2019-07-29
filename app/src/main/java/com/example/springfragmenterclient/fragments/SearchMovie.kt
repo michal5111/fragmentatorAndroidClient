@@ -58,8 +58,7 @@ class SearchMovie : Fragment() {
             .apply { applicationContext = activity?.applicationContext as Fragmentator4000 }
     }
 
-    private fun getMoviesByTitleRequest(title: String): JsonArrayRequest {
-        return JsonArrayRequest(
+    private fun getMoviesByTitleRequest(title: String) = JsonArrayRequest(
             Request.Method.GET, "${Fragmentator4000.apiUrl}/searchMovie?title=$title", null,
             Response.Listener { response ->
                 val gson = Gson()
@@ -78,5 +77,4 @@ class SearchMovie : Fragment() {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             )
         }
-    }
 }
