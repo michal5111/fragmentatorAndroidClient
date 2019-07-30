@@ -48,6 +48,13 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var fileName: String
     private lateinit var endpoint: String
 
+    private class RequestCodes {
+        companion object {
+            const val DOWNLOAD_PERMISSION_REQUEST = 0
+            const val SHARE_PERMISSION_REQUEST = 1
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment_request)
@@ -150,7 +157,7 @@ class FragmentRequestActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this@FragmentRequestActivity,
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                1
+                RequestCodes.DOWNLOAD_PERMISSION_REQUEST
             )
         } else {
             lastDownload = downloadManagerEnqueueForDownload(fileName)
@@ -162,7 +169,7 @@ class FragmentRequestActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this@FragmentRequestActivity,
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                2
+                RequestCodes.SHARE_PERMISSION_REQUEST
             )
         } else {
             lastShare = downloadManagerEnqueueForSharing(fileName)
@@ -236,12 +243,12 @@ class FragmentRequestActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            1 -> {
+            RequestCodes.DOWNLOAD_PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     downloadManagerEnqueueForDownload(fileName)
                 }
             }
-            2 -> {
+            RequestCodes.SHARE_PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     downloadManagerEnqueueForSharing(fileName)
                 }

@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -16,7 +16,6 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.*
-import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 
 class SearchFraze : Fragment() {
@@ -34,19 +33,12 @@ class SearchFraze : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.search_fraze_fragment, container, false)
-        val searchButton = root.findViewById<Button>(R.id.SearchButton)
-        val frazeInput = root.findViewById<TextInputEditText>(R.id.FrazeInput)
+        val searchView: SearchView = root.findViewById(R.id.searchView)
         progressBar = root.findViewById(R.id.progressBar3)
         recyclerView = root.findViewById(R.id.RecyclerView)
         val viewManager = LinearLayoutManager(context)
         recyclerView.layoutManager = viewManager
-        searchButton.setOnClickListener {
-            Fragmentator4000.hideKeyboard(activity as MainActivity)
-            progressBar.visibility = View.VISIBLE
-            RequestQueueSingleton.getInstance(context!!)
-                .addToRequestQueue(
-                        getMoviesByFrazeRequest(Fragmentator4000.encodeValue(frazeInput.text.toString())))
-        }
+        searchView.setOnQueryTextListener(onQueryTextListener)
         return root
     }
 
@@ -75,4 +67,20 @@ class SearchFraze : Fragment() {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             )
         }
+
+    private val onQueryTextListener = object : SearchView.OnQueryTextListener {
+        override fun onQueryTextChange(p0: String?): Boolean {
+            return false
+        }
+
+        override fun onQueryTextSubmit(p0: String?): Boolean {
+            Fragmentator4000.hideKeyboard(activity as MainActivity)
+            progressBar.visibility = View.VISIBLE
+            RequestQueueSingleton.getInstance(context!!)
+                .addToRequestQueue(
+                    getMoviesByFrazeRequest(Fragmentator4000.encodeValue(p0.toString()))
+                )
+            return true
+        }
+    }
 }
