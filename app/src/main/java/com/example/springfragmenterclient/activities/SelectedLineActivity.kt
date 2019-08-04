@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +17,9 @@ import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
 import com.example.springfragmenterclient.Entities.Response
+import com.example.springfragmenterclient.Fragmentator4000
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.json.JSONObject

@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,7 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
-import com.example.springfragmenterclient.fragments.SectionsPagerAdapter
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.adapters.SectionsPagerAdapter
 import com.google.android.material.tabs.TabLayout
 
 class MainActivity : AppCompatActivity() {
@@ -14,7 +15,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val selectionPagerAdapter = SectionsPagerAdapter(this,supportFragmentManager)
+        val selectionPagerAdapter =
+            SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = selectionPagerAdapter
         val tabs: TabLayout = findViewById(R.id.tabs)

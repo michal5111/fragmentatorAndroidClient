@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,8 +12,12 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
+import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.Fragmentator4000
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 import org.json.JSONArray
 
@@ -74,7 +78,9 @@ class SelectedMovieActivity : AppCompatActivity() {
 
     private fun onResponseListener(response: JSONArray) {
         val gson = Gson()
-        lines = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
+        lines = gson.fromJson(response.toString(),
+            Fragmentator4000.linesListType
+        )
         recyclerView.adapter = DialogLineRecyclerViewAdapter(lines).apply {
             setOnLinesSelectedListener { adapter -> onLinesSelectedListener(adapter) }
         }

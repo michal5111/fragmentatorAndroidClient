@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.activities
 
 import android.Manifest
 import android.app.DownloadManager
@@ -19,7 +19,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.Fragmentator4000.Companion.encodeValue
+import com.example.springfragmenterclient.R
 import com.star_zero.sse.EventHandler
 import com.star_zero.sse.EventSource
 import com.star_zero.sse.MessageEvent

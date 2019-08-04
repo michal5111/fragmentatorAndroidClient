@@ -15,14 +15,14 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
-        <activity android:name=".SelectedMovieActivity">
+        <activity android:name=".activities.SelectedMovieActivity">
         </activity>
-        <activity android:name=".FragmentRequestActivity">
+        <activity android:name=".activities.FragmentRequestActivity">
         </activity>
-        <activity android:name=".SelectedLineActivity">
+        <activity android:name=".activities.SelectedLineActivity">
         </activity>
         <activity
-                android:name=".MainActivity"
+                android:name=".activities.MainActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

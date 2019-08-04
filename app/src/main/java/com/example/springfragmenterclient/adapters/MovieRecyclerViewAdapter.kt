@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.activities.MainActivity
 
 class MovieRecyclerViewAdapter(private val dataSet: List<Movie>) :
     RecyclerView.Adapter<MovieRecyclerViewAdapter.ViewHolder>() {

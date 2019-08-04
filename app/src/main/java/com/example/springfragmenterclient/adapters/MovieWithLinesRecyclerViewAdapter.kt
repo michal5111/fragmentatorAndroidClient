@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -12,6 +12,9 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.Fragmentator4000
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 
 class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, private val fraze: String, private val context: Context) : RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>() {
@@ -32,7 +35,8 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, privat
         viewHolder.apply {
             lineRecyclerView.layoutManager = LinearLayoutManager(viewHolder.lineRecyclerView.context)
             titleTextView.text = dataSet[position].fileName
-            RequestQueueSingleton.getInstance(context).addToRequestQueue(getFilteredLines(position,lineRecyclerView))
+            RequestQueueSingleton.getInstance(context)
+                .addToRequestQueue(getFilteredLines(position,lineRecyclerView))
 
         }
     }
@@ -42,11 +46,14 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, privat
         Request.Method.GET, "${Fragmentator4000.apiUrl}/getFilteredLines?subtitlesId=${dataSet[position].subtitles.id}&fraze=$fraze", null,
         Response.Listener { response ->
             val gson = Gson()
-            dataSet[position].subtitles.filteredLines = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
+            dataSet[position].subtitles.filteredLines = gson.fromJson(response.toString(),
+                Fragmentator4000.linesListType
+            )
             for (line in dataSet[position].subtitles.filteredLines) {
                 line.parent = dataSet[position]
             }
-            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
+            lineRecyclerView.adapter =
+                LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
         },
         Response.ErrorListener { error ->
         }

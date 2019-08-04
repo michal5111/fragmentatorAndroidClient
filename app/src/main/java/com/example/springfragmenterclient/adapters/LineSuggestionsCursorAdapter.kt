@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient.fragments
+package com.example.springfragmenterclient.adapters
 
 import android.content.Context
 import android.database.Cursor

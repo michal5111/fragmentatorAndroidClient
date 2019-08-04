@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.adapters
 
 import android.graphics.Color
 import android.text.Html
@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Entities.Line
+import com.example.springfragmenterclient.R
 
 class DialogLineRecyclerViewAdapter(private val dataSet: List<Line>) :
     RecyclerView.Adapter<DialogLineRecyclerViewAdapter.ViewHolder>() {
@@ -56,7 +57,9 @@ class DialogLineRecyclerViewAdapter(private val dataSet: List<Line>) :
             }
         }
         if (selectedItems.get(position,false)) {
-            viewHolder.cardView.setCardBackgroundColor(ContextCompat.getColor(viewHolder.cardView.context,R.color.colorPrimary))
+            viewHolder.cardView.setCardBackgroundColor(ContextCompat.getColor(viewHolder.cardView.context,
+                R.color.colorPrimary
+            ))
         } else {
             viewHolder.cardView.setCardBackgroundColor(Color.WHITE)
         }

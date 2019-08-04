@@ -18,6 +18,10 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.*
 import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.activities.MainActivity
+import com.example.springfragmenterclient.adapters.MovieRecyclerViewAdapter
+import com.example.springfragmenterclient.adapters.MovieSuggestionsCursorAdapter
+import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 
 class SearchMovie : Fragment() {
@@ -57,7 +61,8 @@ class SearchMovie : Fragment() {
             Response.Listener { response ->
                 val gson = Gson()
                 viewModel.movies = gson.fromJson(response.toString(), Fragmentator4000.movieListType)
-                recyclerView.adapter = MovieRecyclerViewAdapter(viewModel.movies)
+                recyclerView.adapter =
+                    MovieRecyclerViewAdapter(viewModel.movies)
                 progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
@@ -85,7 +90,12 @@ class SearchMovie : Fragment() {
                     add("hint",hint.fileName)
                 }
             }
-            searchView.suggestionsAdapter = MovieSuggestionsCursorAdapter(context!!,cursor,true,searchView)
+            searchView.suggestionsAdapter = MovieSuggestionsCursorAdapter(
+                context!!,
+                cursor,
+                true,
+                searchView
+            )
         },
         Response.ErrorListener { error ->
             hints = emptyList()

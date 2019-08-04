@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient
+package com.example.springfragmenterclient.adapters
 
 import android.text.Html
 import android.view.LayoutInflater
@@ -9,6 +9,8 @@ import androidx.cardview.widget.CardView
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Entities.Line
+import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.activities.MainActivity
 
 class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Adapter<LineRecyclerViewAdapter.ViewHolder>() {
 
