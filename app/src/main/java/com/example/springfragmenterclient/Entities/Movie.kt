@@ -6,6 +6,8 @@ import java.io.Serializable
 
 class Movie : Serializable {
     @Expose
+    var id: Long = 0
+    @Expose
     var subtitles: Subtitles = Subtitles()
     @Expose
     var fileName: String = ""

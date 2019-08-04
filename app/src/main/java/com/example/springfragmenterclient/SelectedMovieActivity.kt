@@ -36,10 +36,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         recyclerView.layoutManager = viewManager
         RequestQueueSingleton.getInstance(this)
             .addToRequestQueue(
-                getLines(
-                    Fragmentator4000
-                        .encodeValue("${selectedMovie.path}/${selectedMovie.subtitles.filename}")
-                )
+                getLines(selectedMovie.id)
             )
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
@@ -50,8 +47,8 @@ class SelectedMovieActivity : AppCompatActivity() {
         }
     }
 
-    private fun getLines(fileName: String) = JsonArrayRequest(
-        Request.Method.GET, "${Fragmentator4000.apiUrl}/subtitles?fileName=$fileName", null,
+    private fun getLines(movieId: Long) = JsonArrayRequest(
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/getLines?movieId=$movieId", null,
         Response.Listener { response -> onResponseListener(response) },
         Response.ErrorListener { error ->
             Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()

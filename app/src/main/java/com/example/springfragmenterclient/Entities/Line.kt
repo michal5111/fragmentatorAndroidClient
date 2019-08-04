@@ -7,6 +7,8 @@ import java.io.Serializable
 
 class Line : Serializable {
     @Expose
+    var id: Long = 0
+    @Expose
     var number: Int = 0
     @Expose
     var timeString: String = ""

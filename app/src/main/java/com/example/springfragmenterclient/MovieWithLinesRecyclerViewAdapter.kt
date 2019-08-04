@@ -1,14 +1,20 @@
 package com.example.springfragmenterclient
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.Entities.Movie
+import com.google.gson.Gson
 
-class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>) : RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>() {
+class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, private val fraze: String, private val context: Context) : RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val titleTextView: TextView = v.findViewById(R.id.TitleTextView)
@@ -26,13 +32,29 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>) : Recy
         viewHolder.apply {
             lineRecyclerView.layoutManager = LinearLayoutManager(viewHolder.lineRecyclerView.context)
             titleTextView.text = dataSet[position].fileName
-            for (line in dataSet[position].subtitles.filteredLines) {
-                line.parent = dataSet[position]
-            }
-            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
+            RequestQueueSingleton.getInstance(context).addToRequestQueue(getFilteredLines(position,lineRecyclerView))
+
         }
     }
     override fun getItemCount() = dataSet.size
 
-
+    private fun getFilteredLines(position: Int, lineRecyclerView: RecyclerView) = JsonArrayRequest(
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/getFilteredLines?subtitlesId=${dataSet[position].subtitles.id}&fraze=$fraze", null,
+        Response.Listener { response ->
+            val gson = Gson()
+            dataSet[position].subtitles.filteredLines = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
+            for (line in dataSet[position].subtitles.filteredLines) {
+                line.parent = dataSet[position]
+            }
+            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
+        },
+        Response.ErrorListener { error ->
+        }
+    ).apply {
+        retryPolicy = DefaultRetryPolicy(
+            20000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+    }
 }

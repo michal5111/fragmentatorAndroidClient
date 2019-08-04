@@ -191,53 +191,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                     "&stopOffset=${movie.stopOffset}" +
                     "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
         )
-        return EventSource(
-            adress,
-            object : EventHandler {
-                override fun onError(e: java.lang.Exception?) {
-                    eventSource.close()
-                    textView.post { textView.text = resources.getString(R.string.error, e.toString()) }
-                }
-
-                override fun onOpen() {
-                    message = ""
-                    textView.post { textView.text = message }
-                }
-
-                override fun onMessage(messageEvent: MessageEvent) {
-                    if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
-                        return
-                    }
-                    message = message.plus(messageEvent.data).plus("\n")
-                    if (messageEvent.event.equals("to")) {
-                        to = messageEvent.data.toDouble()
-                    }
-                    if (messageEvent.event.equals("log")) {
-                        if (messageEvent.data.contains("frame=")) {
-                            val offset = messageEvent.data.lastIndexOf("time=")
-                            val time = messageEvent.data.substring(offset + 5, offset + 16)
-                            percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
-                            conversionProgressBar.progress = percent.toInt()
-                        }
-                        textView.post { textView.text = message }
-                        scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
-                    }
-                    if (messageEvent.event.equals("complete")) {
-                        fileName = messageEvent.data
-                        eventSource.close()
-                        conversionProgressBar.progress = 100
-                        openButton.post {
-                            openButton.setOnClickListener { openButtonOnClickListener(fileName) }
-                            downloadButton.setOnClickListener { downloadButtonOnClickListener(fileName) }
-                            shareButton.setOnClickListener { shareButtonOnClickListener(fileName) }
-                            convertButton.isEnabled = true
-                            openButton.isEnabled = true
-                            downloadButton.isEnabled = true
-                            shareButton.isEnabled = true
-                        }
-                    }
-                }
-            })
+        return EventSource(adress,eventHandler)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -291,6 +245,56 @@ class FragmentRequestActivity : AppCompatActivity() {
             openButton.isEnabled = false
             downloadButton.isEnabled = false
             shareButton.isEnabled = false
+        }
+    }
+
+    private val eventHandler = object : EventHandler {
+        override fun onError(e: java.lang.Exception?) {
+            eventSource.close()
+            textView.post { textView.text = resources.getString(R.string.error, e.toString()) }
+        }
+
+        override fun onOpen() {
+            message = ""
+            textView.post { textView.text = message }
+        }
+
+        override fun onMessage(messageEvent: MessageEvent) {
+            if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
+                return
+            }
+            message = message.plus(messageEvent.data).plus("\n")
+            if (messageEvent.event.equals("to")) {
+                to = messageEvent.data.toDouble()
+            }
+            if (messageEvent.event.equals("log")) {
+                if (messageEvent.data.contains("frame=")) {
+                    val offset = messageEvent.data.lastIndexOf("time=")
+                    val time = messageEvent.data.substring(offset + 5, offset + 16)
+                    percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
+                    conversionProgressBar.progress = percent.toInt()
+                }
+                textView.post { textView.text = message }
+                scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+            }
+            if (messageEvent.event.equals("complete")) {
+                fileName = messageEvent.data
+                eventSource.close()
+                conversionProgressBar.progress = 100
+                openButton.post {
+                    openButton.setOnClickListener { openButtonOnClickListener(fileName) }
+                    downloadButton.setOnClickListener { downloadButtonOnClickListener(fileName) }
+                    shareButton.setOnClickListener { shareButtonOnClickListener(fileName) }
+                    convertButton.isEnabled = true
+                    openButton.isEnabled = true
+                    downloadButton.isEnabled = true
+                    shareButton.isEnabled = true
+                }
+            }
+            if (messageEvent.event.equals("error")) {
+                eventSource.close()
+                textView.post { textView.text = resources.getString(R.string.error, messageEvent.data) }
+            }
         }
     }
 }

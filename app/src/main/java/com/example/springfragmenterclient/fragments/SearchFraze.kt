@@ -1,5 +1,6 @@
 package com.example.springfragmenterclient.fragments
 
+import android.database.MatrixCursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.*
+import com.example.springfragmenterclient.Entities.Line
 import com.google.gson.Gson
 
 class SearchFraze : Fragment() {
@@ -27,13 +29,15 @@ class SearchFraze : Fragment() {
     private lateinit var viewModel: SearchFrazeViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
+    private lateinit var searchView: SearchView
+    private var hints: List<Line> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.search_fraze_fragment, container, false)
-        val searchView: SearchView = root.findViewById(R.id.searchView)
+        searchView = root.findViewById(R.id.searchView)
         progressBar = root.findViewById(R.id.progressBar3)
         recyclerView = root.findViewById(R.id.RecyclerView)
         val viewManager = LinearLayoutManager(context)
@@ -53,7 +57,7 @@ class SearchFraze : Fragment() {
             Response.Listener { response ->
                 val gson = Gson()
                 viewModel.movies = gson.fromJson(response.toString(), Fragmentator4000.movieListType)
-                recyclerView.adapter = MovieWithLinesRecyclerViewAdapter(viewModel.movies)
+                recyclerView.adapter = MovieWithLinesRecyclerViewAdapter(viewModel.movies,fraze,context!!)
                 progressBar.visibility = View.INVISIBLE
             },
             Response.ErrorListener { error ->
@@ -68,8 +72,38 @@ class SearchFraze : Fragment() {
             )
         }
 
+    private fun getHints(fraze: String) = JsonArrayRequest(
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/lineHints?fraze=$fraze", null,
+        Response.Listener { response ->
+            val gson = Gson()
+            hints = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
+            val cursor = MatrixCursor(arrayOf("_id","hint"))
+            hints.forEach { hint ->
+                val rowBuilder = cursor.newRow()
+                rowBuilder.apply {
+                    add("_id", hint.id)
+                    add("hint",hint.textLines)
+                }
+            }
+            searchView.suggestionsAdapter = LineSuggestionsCursorAdapter(context!!,cursor,true,searchView)
+        },
+        Response.ErrorListener { error ->
+            hints = emptyList()
+        }
+    ).apply {
+        retryPolicy = DefaultRetryPolicy(
+            20000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+    }
+
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextChange(p0: String?): Boolean {
+            RequestQueueSingleton.getInstance(context!!)
+                .addToRequestQueue(
+                    getHints(Fragmentator4000.encodeValue(p0.toString()))
+                )
             return false
         }
 
@@ -80,6 +114,7 @@ class SearchFraze : Fragment() {
                 .addToRequestQueue(
                     getMoviesByFrazeRequest(Fragmentator4000.encodeValue(p0.toString()))
                 )
+            searchView.clearFocus()
             return true
         }
     }

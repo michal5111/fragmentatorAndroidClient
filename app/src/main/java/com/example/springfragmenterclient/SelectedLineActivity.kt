@@ -17,7 +17,6 @@ import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
 import com.example.springfragmenterclient.Entities.Response
-import com.example.springfragmenterclient.Entities.Subtitles
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.json.JSONObject
@@ -32,7 +31,6 @@ class SelectedLineActivity : AppCompatActivity() {
     private lateinit var selectedLine: Line
     private lateinit var progressBar: ProgressBar
     private lateinit var downloadButton: Button
-    private lateinit var movie: Movie
     private lateinit var editText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +50,7 @@ class SelectedLineActivity : AppCompatActivity() {
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
         downloadButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", movie)
+                putExtra("SELECTED_MOVIE", selectedMovie)
                 putExtra("ENDPOINT", "/requestFragment")
             }
             startActivity(intent)
@@ -62,7 +60,7 @@ class SelectedLineActivity : AppCompatActivity() {
         val dialogButton: Button = findViewById(R.id.Dialog)
         dialogButton.setOnClickListener {
             val intent = Intent(applicationContext, SelectedMovieActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", movie)
+                putExtra("SELECTED_MOVIE", selectedMovie)
                 putExtra("POSITION", selectedLine.number - 1)
             }
             startActivity(intent)
@@ -71,16 +69,10 @@ class SelectedLineActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        movie = Movie().apply {
-            fileName = selectedMovie.fileName
-            path = selectedMovie.path
-            subtitles = Subtitles().apply {
-                filename = selectedMovie.subtitles.filename
-                filteredLines.add(selectedLine)
-            }
-        }
+        selectedMovie.subtitles.filteredLines.clear()
+        selectedMovie.subtitles.filteredLines.add(selectedLine)
         val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
-        val movieJsonString = gson.toJson(movie)
+        val movieJsonString = gson.toJson(selectedMovie)
         val jsonObject = JSONObject(movieJsonString)
         val snapshotRequest = getSnapshotRequest(
             jsonObject,
