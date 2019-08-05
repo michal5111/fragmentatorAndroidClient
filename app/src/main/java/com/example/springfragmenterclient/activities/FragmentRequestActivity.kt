@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -42,6 +43,8 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var conversionProgressBar: ProgressBar
     private lateinit var scrollView: ScrollView
     private lateinit var downloadManager: DownloadManager
+    private lateinit var videoView: VideoView
+    private lateinit var progressBar: ProgressBar
     private var message: String = ""
     private var percent: Double = 0.0
     private var to: Double = 0.0
@@ -49,6 +52,7 @@ class FragmentRequestActivity : AppCompatActivity() {
     private var lastShare: Long = -1L
     private lateinit var fileName: String
     private lateinit var endpoint: String
+    private lateinit var mediaController: MediaController
 
     private class RequestCodes {
         companion object {
@@ -71,6 +75,15 @@ class FragmentRequestActivity : AppCompatActivity() {
         startOffsetEditText = findViewById(R.id.startOffsetEditText)
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
         shareButton = findViewById(R.id.ShareButton)
+        videoView = findViewById(R.id.videoView)
+        mediaController = MediaController(this)
+        videoView.setMediaController(mediaController)
+        videoView.setOnPreparedListener {
+            mediaController.setAnchorView(videoView)
+            progressBar.visibility = View.INVISIBLE
+            videoView.start()
+        }
+        progressBar = findViewById(R.id.progressBar)
         startOffsetEditText.addTextChangedListener(startOffsetTextWatcher)
         stopOffsetEditText.addTextChangedListener(stopOffsetTextWatcher)
         eventSource = createEventSource()
@@ -291,6 +304,8 @@ class FragmentRequestActivity : AppCompatActivity() {
                     openButton.isEnabled = true
                     downloadButton.isEnabled = true
                     shareButton.isEnabled = true
+                    videoView.setVideoURI(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
+                    progressBar.visibility = View.VISIBLE
                 }
             }
             if (messageEvent.event.equals("error")) {
