@@ -5,7 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".fragments.SearchFraze"
+        tools:context=".fragments.SearchPhrase"
         android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
@@ -17,7 +17,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/searchView"
-                android:queryHint="@string/typeFraze"
+                android:queryHint="@string/typePhrase"
                 style="@android:style/Widget.Material.SearchView"
                 android:iconifiedByDefault="false"
                 android:queryBackground="@android:color/transparent"/>
@@ -35,7 +35,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:listitem="@layout/movie_with_lines_row_item">
 
         </androidx.recyclerview.widget.RecyclerView>
 

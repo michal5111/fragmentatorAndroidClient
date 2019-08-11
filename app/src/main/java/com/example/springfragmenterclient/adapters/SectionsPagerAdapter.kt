@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.fragments.SearchFraze
+import com.example.springfragmenterclient.fragments.SearchPhrase
 import com.example.springfragmenterclient.fragments.SearchMovie
 
 class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm) {
@@ -17,7 +17,7 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) : 
 
     override fun getItem(position: Int): Fragment {
         when (position) {
-            0 -> return SearchFraze.newInstance()
+            0 -> return SearchPhrase.newInstance()
             1 -> return SearchMovie.newInstance()
         }
         throw IllegalArgumentException("Invalid position")

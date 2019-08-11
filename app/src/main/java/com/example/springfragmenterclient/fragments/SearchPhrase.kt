@@ -16,21 +16,22 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.example.springfragmenterclient.*
 import com.example.springfragmenterclient.Entities.Line
+import com.example.springfragmenterclient.Fragmentator4000
+import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.MovieWithLinesRecyclerViewAdapter
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 
-class SearchFraze : Fragment() {
+class SearchPhrase : Fragment() {
 
     companion object {
-        fun newInstance() = SearchFraze()
+        fun newInstance() = SearchPhrase()
     }
 
-    private lateinit var viewModel: SearchFrazeViewModel
+    private lateinit var viewModel: SearchPhraseViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
@@ -40,7 +41,7 @@ class SearchFraze : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val root = inflater.inflate(R.layout.search_fraze_fragment, container, false)
+        val root = inflater.inflate(R.layout.search_phrase_fragment, container, false)
         searchView = root.findViewById(R.id.searchView)
         progressBar = root.findViewById(R.id.progressBar3)
         recyclerView = root.findViewById(R.id.RecyclerView)
@@ -52,18 +53,18 @@ class SearchFraze : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SearchFrazeViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(SearchPhraseViewModel::class.java)
             .apply { applicationContext = activity?.applicationContext as Fragmentator4000 }
     }
 
-    private fun getMoviesByFrazeRequest(fraze: String) = JsonArrayRequest(
-            Request.Method.GET, "${Fragmentator4000.apiUrl}/searchFraze?fraze=$fraze", null,
+    private fun getMoviesByPhraseRequest(phrase: String) = JsonArrayRequest(
+            Request.Method.GET, "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase", null,
             Response.Listener { response ->
                 val gson = Gson()
                 viewModel.movies = gson.fromJson(response.toString(), Fragmentator4000.movieListType)
                 recyclerView.adapter = MovieWithLinesRecyclerViewAdapter(
                     viewModel.movies,
-                    fraze,
+                    phrase,
                     context!!
                 )
                 progressBar.visibility = View.INVISIBLE
@@ -80,8 +81,8 @@ class SearchFraze : Fragment() {
             )
         }
 
-    private fun getHints(fraze: String) = JsonArrayRequest(
-        Request.Method.GET, "${Fragmentator4000.apiUrl}/lineHints?fraze=$fraze", null,
+    private fun getHints(phrase: String) = JsonArrayRequest(
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/lineHints?phrase=$phrase", null,
         Response.Listener { response ->
             val gson = Gson()
             hints = gson.fromJson(response.toString(), Fragmentator4000.linesListType)
@@ -125,7 +126,7 @@ class SearchFraze : Fragment() {
             progressBar.visibility = View.VISIBLE
             RequestQueueSingleton.getInstance(context!!)
                 .addToRequestQueue(
-                    getMoviesByFrazeRequest(Fragmentator4000.encodeValue(p0.toString()))
+                    getMoviesByPhraseRequest(Fragmentator4000.encodeValue(p0.toString()))
                 )
             searchView.clearFocus()
             return true

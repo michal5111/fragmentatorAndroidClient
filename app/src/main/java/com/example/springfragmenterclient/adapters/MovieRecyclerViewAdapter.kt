@@ -36,9 +36,9 @@ class MovieRecyclerViewAdapter(private val dataSet: List<Movie>) :
 
     override fun getItemCount() = dataSet.size
 
-    fun filter(fraze: String) {
+    fun filter(phrase: String) {
         dataSet.forEach {
-            if (!it.fileName.contains(fraze)) {
+            if (!it.fileName.contains(phrase)) {
 
             }
         }
