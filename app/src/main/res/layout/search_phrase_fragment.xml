@@ -23,6 +23,16 @@
                 android:queryBackground="@android:color/transparent"/>
     </androidx.cardview.widget.CardView>
 
+    <SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:searchIcon="@drawable/ic_filter_list_black_24dp"
+            android:searchHintIcon="@drawable/ic_filter_list_black_24dp"
+            android:queryHint="@string/filterByTitle"
+            android:id="@+id/filterSearchView"
+            android:visibility="gone"
+            android:imeOptions="actionDone"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">

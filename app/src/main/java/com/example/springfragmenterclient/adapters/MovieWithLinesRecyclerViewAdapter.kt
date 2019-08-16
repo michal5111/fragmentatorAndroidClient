@@ -1,22 +1,55 @@
 package com.example.springfragmenterclient.adapters
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
 import com.example.springfragmenterclient.Entities.Movie
-import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
-import com.google.gson.Gson
 
-class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, private val phrase: String, private val context: Context) : RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>() {
+class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
+    RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>(), Filterable {
+
+    private val dataSet = mutableListOf<Movie>()
+
+    override fun getFilter(): Filter {
+        return filterByTitle
+    }
+
+    init {
+        dataSet.addAll(dataSetFull)
+    }
+
+    private val filterByTitle = object : Filter() {
+        override fun performFiltering(p0: CharSequence?): FilterResults {
+            val filteredList: MutableList<Movie> = emptyList<Movie>().toMutableList()
+            if (p0.isNullOrBlank()) {
+                filteredList.addAll(dataSetFull)
+            } else {
+                val pattern = p0.toString().toUpperCase().replace('.', ' ').trim()
+                dataSetFull.forEach {
+                    if (it.fileName.toUpperCase().replace('.', ' ').contains(pattern)) {
+                        filteredList.add(it)
+                    }
+                }
+            }
+            val filteredResults = FilterResults()
+            filteredResults.values = filteredList
+            return filteredResults
+        }
+
+        override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
+            dataSet.clear()
+            dataSet.addAll(p1!!.values as MutableList<Movie>)
+            notifyDataSetChanged()
+        }
+
+    }
+
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val titleTextView: TextView = v.findViewById(R.id.TitleTextView)
@@ -38,33 +71,7 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSet: List<Movie>, privat
                 line.parent = dataSet[position]
             }
             lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
-            //RequestQueueSingleton.getInstance(context)
-                //.addToRequestQueue(getFilteredLines(position,lineRecyclerView))
-
         }
     }
     override fun getItemCount() = dataSet.size
-
-    private fun getFilteredLines(position: Int, lineRecyclerView: RecyclerView) = JsonArrayRequest(
-        Request.Method.GET, "${Fragmentator4000.apiUrl}/getFilteredLines?subtitlesId=${dataSet[position].subtitles.id}&phrase=$phrase", null,
-        Response.Listener { response ->
-            val gson = Gson()
-            dataSet[position].subtitles.filteredLines = gson.fromJson(response.toString(),
-                Fragmentator4000.linesListType
-            )
-            for (line in dataSet[position].subtitles.filteredLines) {
-                line.parent = dataSet[position]
-            }
-            lineRecyclerView.adapter =
-                LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
-        },
-        Response.ErrorListener { error ->
-        }
-    ).apply {
-        retryPolicy = DefaultRetryPolicy(
-            20000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-    }
 }

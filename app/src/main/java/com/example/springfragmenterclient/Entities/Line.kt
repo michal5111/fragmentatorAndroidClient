@@ -5,14 +5,14 @@ import com.google.gson.annotations.Expose
 import java.io.Serializable
 
 
-class Line : Serializable {
+data class Line(
     @Expose
-    var id: Long = 0
+    var id: Long,
     @Expose
-    var number: Int = 0
+    var number: Int,
     @Expose
-    var timeString: String = ""
+    var timeString: String,
     @Expose
-    var textLines: String = ""
+    var textLines: String,
     var parent: Movie? = null
-}
+) : Serializable

@@ -3,11 +3,11 @@ package com.example.springfragmenterclient.Entities
 import com.google.gson.annotations.Expose
 import java.io.Serializable
 
-open class Subtitles : Serializable {
+data class Subtitles(
     @Expose
-    var id: Long = 0
+    var id: Long,
     @Expose
-    var filename: String = ""
+    var filename: String,
     @Expose
     var filteredLines: MutableList<Line> = mutableListOf()
-}
+) : Serializable

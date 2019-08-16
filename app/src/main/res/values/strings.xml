@@ -15,4 +15,6 @@
     <string name="tab2Name">Dialog</string>
     <string name="typeMovieTitle">Wpisz tytuł filmu</string>
     <string name="error">Błąd: %1$s</string>
+    <string name="filterByTitle">Filtruj po tytule</string>
+    <string name="filterByFraze">Filtruj po frazie</string>
 </resources>

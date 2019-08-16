@@ -54,11 +54,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var endpoint: String
     private lateinit var mediaController: MediaController
 
-    private class RequestCodes {
-        companion object {
+    private object RequestCodes {
             const val DOWNLOAD_PERMISSION_REQUEST = 0
             const val SHARE_PERMISSION_REQUEST = 1
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

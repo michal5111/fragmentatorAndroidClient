@@ -3,23 +3,21 @@ package com.example.springfragmenterclient.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
-import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.Entities.Line
 import com.example.springfragmenterclient.Entities.Movie
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
+import com.example.springfragmenterclient.utils.GsonRequest
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
-import com.google.gson.Gson
-import org.json.JSONArray
 
 class SelectedMovieActivity : AppCompatActivity() {
 
@@ -27,6 +25,7 @@ class SelectedMovieActivity : AppCompatActivity() {
     private lateinit var lines: List<Line>
     private lateinit var recyclerView: RecyclerView
     private lateinit var selectButton: Button
+    private lateinit var filterSearchView: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +37,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        RequestQueueSingleton.getInstance(this)
-            .addToRequestQueue(
-                getLines(selectedMovie.id)
-            )
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(getLines(selectedMovie.id))
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)
@@ -49,10 +45,14 @@ class SelectedMovieActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        filterSearchView = findViewById(R.id.filterSearchView)
+        filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
     }
 
-    private fun getLines(movieId: Long) = JsonArrayRequest(
-        Request.Method.GET, "${Fragmentator4000.apiUrl}/getLines?movieId=$movieId", null,
+    private fun getLines(movieId: Long) = GsonRequest<List<Line>>(
+        "${Fragmentator4000.apiUrl}/getLines?movieId=$movieId",
+        Fragmentator4000.linesListType,
+        mutableMapOf(),
         Response.Listener { response -> onResponseListener(response) },
         Response.ErrorListener { error ->
             Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -66,6 +66,10 @@ class SelectedMovieActivity : AppCompatActivity() {
     }
 
     private fun onLinesSelectedListener(adapter: DialogLineRecyclerViewAdapter) {
+        if (filterSearchView.query.isNotBlank()) {
+            filterSearchView.setQuery("", false)
+            //recyclerView.scrollTo()
+        }
         if (adapter.selectedItems.size() >= 2) {
             selectButton.isEnabled = true
             selectedMovie.subtitles.filteredLines = lines.filter {
@@ -76,11 +80,8 @@ class SelectedMovieActivity : AppCompatActivity() {
         }
     }
 
-    private fun onResponseListener(response: JSONArray) {
-        val gson = Gson()
-        lines = gson.fromJson(response.toString(),
-            Fragmentator4000.linesListType
-        )
+    private fun onResponseListener(response: List<Line>) {
+        lines = response
         recyclerView.adapter = DialogLineRecyclerViewAdapter(lines).apply {
             setOnLinesSelectedListener { adapter -> onLinesSelectedListener(adapter) }
         }
@@ -94,5 +95,17 @@ class SelectedMovieActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(p0: String?): Boolean {
+            return false
+        }
+
+        override fun onQueryTextChange(p0: String?): Boolean {
+            (recyclerView.adapter as DialogLineRecyclerViewAdapter).filter.filter(p0)
+            return false
+        }
+
     }
 }

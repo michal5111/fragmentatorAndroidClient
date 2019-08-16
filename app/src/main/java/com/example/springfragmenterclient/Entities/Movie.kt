@@ -4,18 +4,17 @@ import com.google.gson.annotations.Expose
 
 import java.io.Serializable
 
-class Movie : Serializable {
+data class Movie(
     @Expose
-    var id: Long = 0
+    var id: Long,
     @Expose
-    var subtitles: Subtitles = Subtitles()
+    var subtitles: Subtitles,
     @Expose
-    var fileName: String = ""
+    var fileName: String,
     @Expose
-    var path: String = ""
+    var path: String,
     @Expose
-    var startOffset: Double = 0.0
+    var startOffset: Double = 0.0,
     @Expose
     var stopOffset: Double = 0.0
-
-}
+) : Serializable

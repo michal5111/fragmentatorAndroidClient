@@ -17,6 +17,16 @@
             android:textStyle="bold"
             android:textAlignment="center"/>
 
+    <SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:searchIcon="@drawable/ic_filter_list_black_24dp"
+            android:searchHintIcon="@drawable/ic_filter_list_black_24dp"
+            android:queryHint="@string/filterByFraze"
+            android:id="@+id/filterSearchView"
+            android:imeOptions="actionDone"
+            android:layout_weight="0"/>
+
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -12,8 +12,9 @@ import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import com.example.springfragmenterclient.R
 
-class LineSuggestionsCursorAdapter(context: Context, c: Cursor, autoRequery: Boolean,
-                                   private val searchView: SearchView
+class LineSuggestionsCursorAdapter(
+    context: Context, c: Cursor, autoRequery: Boolean,
+    private val searchView: SearchView
 ) :
     CursorAdapter(context, c, autoRequery) {
 
