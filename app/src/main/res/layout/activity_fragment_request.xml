@@ -8,179 +8,137 @@
         tools:context=".activities.FragmentRequestActivity">
 
     <ScrollView
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:id="@+id/scrollView2"
+            android:id="@+id/log_scroll_view"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@id/videoView">
+            app:layout_constraintBottom_toTopOf="@id/video_view"
+            android:layout_height="0dp">
 
-        <LinearLayout
+        <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/EventTextView"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:textSize="12sp"/>
-        </LinearLayout>
+                android:id="@+id/event_text"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:textSize="12sp"/>
     </ScrollView>
 
     <VideoView
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:id="@+id/videoView"
+            android:layout_height="200dp"
+            android:id="@+id/video_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/scrollView2"
-            app:layout_constraintBottom_toTopOf="@id/ConversionprogressBar"/>
+            app:layout_constraintTop_toBottomOf="@id/log_scroll_view"
+            app:layout_constraintBottom_toTopOf="@id/conversion_progress_bar"/>
 
     <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
-            app:layout_constraintBottom_toTopOf="@+id/tableLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="0dp"
             android:layout_height="26dp"
-            android:id="@+id/ConversionprogressBar"
-            android:layout_marginBottom="8dp"
+            android:id="@+id/conversion_progress_bar"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/videoView"/>
+            app:layout_constraintTop_toBottomOf="@id/video_view"
+            app:layout_constraintBottom_toTopOf="@+id/startOffsetEditText"/>
 
-    <TableLayout
-            android:layout_width="0dp"
+    <EditText
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:inputType="numberDecimal|numberSigned"
+            android:ems="10"
+            android:id="@+id/startOffsetEditText"
+            android:hint="@string/startOffset"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/conversion_progress_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/stopOffsetEditText"
+            android:layout_marginBottom="8dp"/>
+
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal|numberSigned"
+            android:ems="10"
+            android:id="@+id/stopOffsetEditText"
+            android:hint="@string/stopOffset"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/share_button"/>
+
+    <Button
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/share_button"
+            style="?buttonBarButtonStyle"
+            android:text="@string/share"
+            android:drawableStart="@drawable/ic_share_black_24dp"
+            android:enabled="false"
+            app:layout_constraintBottom_toTopOf="@+id/convert_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="8dp"/>
+
+    <Button
+            android:id="@+id/open_button"
+            style="?buttonBarButtonStyle"
+            android:text="@string/open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:textAlignment="center"
+            android:drawableStart="@drawable/ic_play_arrow_black_24dp"
+            android:layout_margin="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/convert_button"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:id="@+id/tableLayout"
-            android:layout_marginTop="7dp"
-            app:layout_constraintTop_toBottomOf="@+id/ConversionprogressBar">
+            app:layout_constraintTop_toBottomOf="@+id/stopOffsetEditText"/>
 
-        <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    <Button
+            android:id="@+id/convert_button"
+            style="?buttonBarButtonStyle"
+            android:text="@string/convert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:drawableStart="@drawable/ic_build_black_24dp"
+            android:layout_margin="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/download_button"
+            app:layout_constraintStart_toEndOf="@+id/open_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
 
-            <TextView
-                    android:text="@string/startOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView"/>
-
-            <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:ems="10"
-                    android:id="@+id/startOffsetEditText"
-                    android:hint="@string/startOffset"/>
-        </TableRow>
-
-        <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            <TextView
-                    android:text="@string/stopOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView2"/>
-
-            <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:ems="10"
-                    android:id="@+id/stopOffsetEditText"
-                    android:hint="@string/stopOffset"/>
-        </TableRow>
-
-        <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
-                style="?buttonBarButtonStyle">
-
-            <Button
-                    android:id="@+id/ShareButton"
-                    style="?buttonBarButtonStyle"
-                    android:text="@string/share"
-                    android:drawableStart="@drawable/ic_share_black_24dp"
-                    android:enabled="false"/>
-        </TableRow>
-
-        <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
-                style="?buttonBarStyle">
-
-            <Button
-                    android:id="@+id/OpenButton"
-                    style="?buttonBarButtonStyle"
-                    android:text="@string/open"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="8dp"
-                    android:enabled="false"
-                    android:textAlignment="center"
-                    android:drawableStart="@drawable/ic_play_arrow_black_24dp"/>
-
-            <Button
-                    android:id="@+id/ConvertButton"
-                    style="?buttonBarButtonStyle"
-                    android:text="@string/convert"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="8dp"
-                    android:textAlignment="center"
-                    android:drawableStart="@drawable/ic_build_black_24dp"
-                    />
-
-            <Button
-                    style="?buttonBarButtonStyle"
-                    android:text="@string/download"
-                    android:id="@+id/DownloadButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="8dp"
-                    android:enabled="false"
-                    android:textAlignment="center"
-                    android:drawableStart="@drawable/ic_get_app_black_24dp"/>
-        </TableRow>
-    </TableLayout>
+    <Button
+            style="?buttonBarButtonStyle"
+            android:text="@string/download"
+            android:id="@+id/download_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:textAlignment="center"
+            android:drawableStart="@drawable/ic_get_app_black_24dp"
+            android:layout_margin="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/convert_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stopOffsetEditText"/>
 
     <ProgressBar
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/progressBar"
-            app:layout_constraintEnd_toEndOf="@+id/videoView"
-            app:layout_constraintStart_toStartOf="@+id/videoView"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="@+id/videoView"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/ConversionprogressBar"
+            app:layout_constraintEnd_toEndOf="@+id/video_view"
+            app:layout_constraintStart_toStartOf="@+id/video_view"
+            app:layout_constraintTop_toTopOf="@+id/video_view"
+            app:layout_constraintBottom_toTopOf="@+id/conversion_progress_bar"
             android:visibility="invisible"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
