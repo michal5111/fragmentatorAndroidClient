@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets
 class Fragmentator4000 : Application() {
 
     companion object {
-        private const val serverUrl = "http://michal5111.asuscomm.com:8080"
+        private const val serverUrl = "http://michal5111.ddns.net:8080/fragmentatorServer"
         const val apiUrl = "$serverUrl/api"
         const val fragmentsUrl = "$serverUrl/fragments"
         val movieListType = object : TypeToken<List<Movie>>() {}.type!!
