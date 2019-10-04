@@ -13,7 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.springfragmenterclient.Entities.Line
+import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.R
 
 class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :

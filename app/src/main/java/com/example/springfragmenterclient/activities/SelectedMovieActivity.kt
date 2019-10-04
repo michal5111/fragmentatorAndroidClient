@@ -11,11 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
-import com.example.springfragmenterclient.Entities.Line
-import com.example.springfragmenterclient.Entities.Movie
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
+import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.utils.GsonRequest
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 

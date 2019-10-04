@@ -14,15 +14,13 @@ import com.android.volley.Request
 import com.android.volley.toolbox.ImageLoader
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.NetworkImageView
-import com.example.springfragmenterclient.Entities.Line
-import com.example.springfragmenterclient.Entities.Movie
-import com.example.springfragmenterclient.Entities.Response
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.entities.Response
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import org.json.JSONObject
 
 class SelectedLineActivity : AppCompatActivity() {
 
@@ -74,21 +72,16 @@ class SelectedLineActivity : AppCompatActivity() {
         super.onStart()
         selectedMovie.subtitles.filteredLines.clear()
         selectedMovie.subtitles.filteredLines.add(selectedLine)
-        val gson: Gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
-        val movieJsonString = gson.toJson(selectedMovie)
-        val jsonObject = JSONObject(movieJsonString)
         val snapshotRequest = getSnapshotRequest(
-            jsonObject,
             RequestQueueSingleton.getInstance(this).imageLoader
         )
         RequestQueueSingleton.getInstance(this).addToRequestQueue(snapshotRequest)
     }
 
     private fun getSnapshotRequest(
-        movie: JSONObject,
         imageLoader: ImageLoader
     ) = JsonObjectRequest(
-        Request.Method.POST, "${Fragmentator4000.apiUrl}/linesnapshot", movie,
+        Request.Method.GET, "${Fragmentator4000.apiUrl}/lineSnapshot?lineId=${selectedLine.id}", null,
         com.android.volley.Response.Listener { response ->
             val gson = Gson()
             val json =

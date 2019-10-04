@@ -19,13 +19,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.example.springfragmenterclient.Entities.Movie
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
 import com.example.springfragmenterclient.Fragmentator4000
-import com.example.springfragmenterclient.Fragmentator4000.Companion.encodeValue
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.entities.FragmentRequest
+import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.utils.RequestQueueSingleton
+import com.google.gson.Gson
 import com.star_zero.sse.EventHandler
 import com.star_zero.sse.EventSource
 import com.star_zero.sse.MessageEvent
+import org.json.JSONObject
 import java.io.File
 
 
@@ -53,6 +59,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var fileName: String
     private lateinit var endpoint: String
     private lateinit var mediaController: MediaController
+    private var fragmentRequest: FragmentRequest = FragmentRequest()
+    private val gson: Gson = Gson()
+    private lateinit var requestQueue: RequestQueueSingleton
 
     private object RequestCodes {
             const val DOWNLOAD_PERMISSION_REQUEST = 0
@@ -88,11 +97,18 @@ class FragmentRequestActivity : AppCompatActivity() {
         convertButton.setOnClickListener {
             conversionProgressBar.progress = 0
             convertButton.isEnabled = false
-            eventSource = createEventSource()
-            eventSource.connect()
+            val json = gson.toJson(fragmentRequest)
+            print(json)
+            requestQueue.addToRequestQueue(postFragmentRequest(JSONObject(json)))
         }
         downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        fragmentRequest.apply {
+            movieId = movie.id
+            startLineId = movie.subtitles.filteredLines.first().id
+            stopLineId = movie.subtitles.filteredLines.last().id
+        }
+        requestQueue = RequestQueueSingleton.getInstance(applicationContext!!)
     }
 
     fun shareFile(uri: Uri) {
@@ -190,20 +206,7 @@ class FragmentRequestActivity : AppCompatActivity() {
     }
 
     private fun createEventSource(): EventSource {
-        var adress = "${Fragmentator4000.apiUrl}$endpoint?fileName=${encodeValue(movie.fileName)}" +
-                "&path=${encodeValue(movie.path)}"
-        for (line in movie.subtitles.filteredLines) {
-            adress = adress.plus(
-                "&line=${encodeValue(line.textLines)}" +
-                        "&timeString=${encodeValue(line.timeString)}" +
-                        "&lineNumber=${line.number}"
-            )
-        }
-        adress = adress.plus(
-            "&startOffset=${movie.startOffset}" +
-                    "&stopOffset=${movie.stopOffset}" +
-                    "&subtitlesFileName=${encodeValue(movie.subtitles.filename)}"
-        )
+        val adress = "${Fragmentator4000.apiUrl}/fragmentRequest/${fragmentRequest.id}"
         return EventSource(adress,eventHandler)
     }
 
@@ -226,9 +229,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private val stopOffsetTextWatcher = object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
             try {
-                movie.stopOffset = p0.toString().toDouble()
+                fragmentRequest.startOffset = p0.toString().toDouble()
             } catch (e: Exception) {
-                movie.stopOffset = 0.0
+                fragmentRequest.stopOffset = 0.0
             }
         }
 
@@ -245,9 +248,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private val startOffsetTextWatcher = object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
             try {
-                movie.startOffset = p0.toString().toDouble()
+                fragmentRequest.startOffset = p0.toString().toDouble()
             } catch (e: Exception) {
-                movie.startOffset = 0.0
+                fragmentRequest.startOffset = 0.0
             }
         }
 
@@ -311,5 +314,29 @@ class FragmentRequestActivity : AppCompatActivity() {
                 textView.post { textView.text = resources.getString(R.string.error, messageEvent.data) }
             }
         }
+    }
+
+    private fun postFragmentRequest(
+        jsonObject: JSONObject
+    ) = JsonObjectRequest(
+        Request.Method.POST, "${Fragmentator4000.apiUrl}/fragmentRequest", jsonObject,
+        com.android.volley.Response.Listener { response ->
+            val gson = Gson()
+            val json =
+                gson.fromJson(response.toString(), FragmentRequest::class.java)
+            fragmentRequest = json
+            eventSource = createEventSource()
+            eventSource.connect()
+        },
+        com.android.volley.Response.ErrorListener { error ->
+            progressBar.visibility = View.INVISIBLE
+            Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+        }
+    ).apply {
+        retryPolicy = DefaultRetryPolicy(
+            1000,
+            20,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
     }
 }

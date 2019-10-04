@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.example.springfragmenterclient.Entities.Line
-import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.utils.GsonRequest
 

@@ -4,8 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.example.springfragmenterclient.Entities.Line
-import com.example.springfragmenterclient.Entities.Movie
+import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.entities.Movie
 import com.google.gson.reflect.TypeToken
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets

@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient.Entities
+package com.example.springfragmenterclient.entities
 
 import com.google.gson.annotations.Expose
 
@@ -12,9 +12,5 @@ data class Movie(
     @Expose
     var fileName: String,
     @Expose
-    var path: String,
-    @Expose
-    var startOffset: Double = 0.0,
-    @Expose
-    var stopOffset: Double = 0.0
+    var path: String
 ) : Serializable
