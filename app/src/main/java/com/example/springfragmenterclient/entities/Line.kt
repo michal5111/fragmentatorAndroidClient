@@ -14,5 +14,6 @@ data class Line(
     var timeString: String,
     @Expose
     var textLines: String,
-    var parent: Movie? = null
+    @Expose
+    val subtitles: Subtitles
 ) : Serializable

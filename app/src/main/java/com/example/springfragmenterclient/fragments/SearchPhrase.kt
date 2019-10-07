@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
+import com.example.springfragmenterclient.adapters.LineRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.MovieWithLinesRecyclerViewAdapter
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
@@ -79,8 +80,8 @@ class SearchPhrase : Fragment() {
             requestQueue.addToRequestQueue(
                 viewModel.getMoviesByPhraseRequest(Fragmentator4000.encodeValue(p0.toString()),
                     {
-                        recyclerView.adapter = MovieWithLinesRecyclerViewAdapter(
-                            viewModel.movies
+                        recyclerView.adapter = LineRecyclerViewAdapter(
+                            viewModel.lines
                         )
                         progressBar.visibility = View.INVISIBLE
                     },

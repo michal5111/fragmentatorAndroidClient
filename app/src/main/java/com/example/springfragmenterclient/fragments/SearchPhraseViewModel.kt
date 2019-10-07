@@ -6,21 +6,20 @@ import androidx.lifecycle.ViewModel
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.Fragmentator4000
+import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.utils.GsonRequest
 
 class SearchPhraseViewModel : ViewModel() {
-    var movies: List<Movie> = emptyList()
+    var lines: List<Line> = emptyList()
 
     fun getMoviesByPhraseRequest(phrase: String, successListener: () -> Unit, errorListener: (VolleyError) -> Unit) =
-        GsonRequest<List<Movie>>(
-            "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase",
-            Fragmentator4000.movieListType,
+        GsonRequest<List<Line>>(
+            "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase&firstResult=0&maxResults=1000",
+            Fragmentator4000.linesListType,
             mutableMapOf(),
             Response.Listener { response ->
-                movies = response
+                lines = response
                 successListener.invoke()
             },
             Response.ErrorListener { error ->

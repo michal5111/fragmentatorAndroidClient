@@ -8,7 +8,7 @@ data class Movie(
     @Expose
     var id: Long,
     @Expose
-    var subtitles: Subtitles,
+    var subtitles: Number,
     @Expose
     var fileName: String,
     @Expose

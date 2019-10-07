@@ -14,6 +14,7 @@ import com.android.volley.Response
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
+import com.example.springfragmenterclient.entities.FragmentRequest
 import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.utils.GsonRequest
@@ -26,6 +27,7 @@ class SelectedMovieActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var selectButton: Button
     private lateinit var filterSearchView: SearchView
+    private var fragmentRequest: FragmentRequest = FragmentRequest()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,9 @@ class SelectedMovieActivity : AppCompatActivity() {
         selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         recyclerView = findViewById(R.id.RecyclerView)
         selectButton = findViewById(R.id.button)
+        fragmentRequest.apply {
+            movieId = selectedMovie.id
+        }
         val viewManager = LinearLayoutManager(this)
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = selectedMovie.fileName
@@ -41,7 +46,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)
-                putExtra("ENDPOINT", "/dialog")
+                putExtra("FRAGMENT_REQUEST", fragmentRequest)
             }
             startActivity(intent)
         }
@@ -72,9 +77,10 @@ class SelectedMovieActivity : AppCompatActivity() {
         }
         if (adapter.selectedItems.size() >= 2) {
             selectButton.isEnabled = true
-            selectedMovie.subtitles.filteredLines = lines.filter {
-                adapter.selectedItems.get(lines.lastIndexOf(it), false)
-            }.toMutableList()
+            fragmentRequest.apply {
+                startLineId = lines.first().id
+                stopLineId = lines.last().id
+            }
         } else {
             selectButton.isEnabled = false
         }

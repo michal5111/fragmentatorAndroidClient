@@ -31,7 +31,7 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
             timeTextView.text = dataSet[position].timeString
             lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
             cardView.setOnClickListener {
-                (this.lineTextView.context as MainActivity).selectLine(dataSet[position].parent!!,dataSet[position])
+                (this.lineTextView.context as MainActivity).selectLine(dataSet[position].subtitles.movie,dataSet[position])
             }
         }
     }

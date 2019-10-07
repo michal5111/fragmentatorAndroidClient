@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -57,9 +58,8 @@ class FragmentRequestActivity : AppCompatActivity() {
     private var lastDownload: Long = -1L
     private var lastShare: Long = -1L
     private lateinit var fileName: String
-    private lateinit var endpoint: String
     private lateinit var mediaController: MediaController
-    private var fragmentRequest: FragmentRequest = FragmentRequest()
+    private lateinit var fragmentRequest: FragmentRequest
     private val gson: Gson = Gson()
     private lateinit var requestQueue: RequestQueueSingleton
 
@@ -72,7 +72,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment_request)
         movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-        endpoint = intent.getStringExtra("ENDPOINT")!!
+        fragmentRequest = intent.getSerializableExtra("FRAGMENT_REQUEST") as FragmentRequest
         textView = findViewById(R.id.event_text)
         openButton = findViewById(R.id.open_button)
         downloadButton = findViewById(R.id.download_button)
@@ -98,16 +98,11 @@ class FragmentRequestActivity : AppCompatActivity() {
             conversionProgressBar.progress = 0
             convertButton.isEnabled = false
             val json = gson.toJson(fragmentRequest)
-            print(json)
+            Log.i("JSON",json)
             requestQueue.addToRequestQueue(postFragmentRequest(JSONObject(json)))
         }
         downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-        fragmentRequest.apply {
-            movieId = movie.id
-            startLineId = movie.subtitles.filteredLines.first().id
-            stopLineId = movie.subtitles.filteredLines.last().id
-        }
         requestQueue = RequestQueueSingleton.getInstance(applicationContext!!)
     }
 
@@ -152,7 +147,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(false)
-            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
+            .setTitle("Fragment: " + movie.fileName + fragmentRequest.startLineId)
             .setDescription(movie.fileName)
             .setDestinationInExternalFilesDir(
                 this@FragmentRequestActivity,
@@ -165,7 +160,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(false)
-            .setTitle("Fragment: " + movie.subtitles.filteredLines[0].textLines)
+            .setTitle("Fragment: " + movie.fileName + fragmentRequest.startLineId)
             .setDescription(movie.fileName)
             .setDestinationInExternalPublicDir(
                 Environment.DIRECTORY_DOWNLOADS,
@@ -229,7 +224,7 @@ class FragmentRequestActivity : AppCompatActivity() {
     private val stopOffsetTextWatcher = object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
             try {
-                fragmentRequest.startOffset = p0.toString().toDouble()
+                fragmentRequest.stopOffset = p0.toString().toDouble()
             } catch (e: Exception) {
                 fragmentRequest.stopOffset = 0.0
             }

@@ -8,8 +8,8 @@ import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.entities.Movie
 
 class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
     RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>(), Filterable {
@@ -67,10 +67,10 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
         viewHolder.apply {
             lineRecyclerView.layoutManager = LinearLayoutManager(viewHolder.lineRecyclerView.context)
             titleTextView.text = dataSet[position].fileName
-            for (line in dataSet[position].subtitles.filteredLines) {
-                line.parent = dataSet[position]
-            }
-            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
+//            for (line in dataSet[position].subtitles.filteredLines) {
+//                line.parent = dataSet[position]
+//            }
+//            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
         }
     }
     override fun getItemCount() = dataSet.size

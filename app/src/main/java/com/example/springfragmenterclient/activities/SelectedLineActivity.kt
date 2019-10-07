@@ -16,6 +16,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.entities.FragmentRequest
 import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.entities.Response
@@ -33,6 +34,7 @@ class SelectedLineActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var downloadButton: Button
     private lateinit var editText: EditText
+    private var fragmentRequest: FragmentRequest = FragmentRequest()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,14 +47,18 @@ class SelectedLineActivity : AppCompatActivity() {
         editText = findViewById(R.id.SelectedLineEditText)
         selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
-        movieTitleTextView.text = selectedMovie.fileName
+        fragmentRequest.apply {
+            movieId = selectedMovie.id
+            startLineId = selectedLine.id
+            stopLineId = selectedLine.id
+        }
         movieTimeTextView.text = selectedLine.timeString
         textView.text = HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
         downloadButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)
-                putExtra("ENDPOINT", "/requestFragment")
+                putExtra("FRAGMENT_REQUEST", fragmentRequest)
             }
             startActivity(intent)
         }
@@ -70,8 +76,6 @@ class SelectedLineActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        selectedMovie.subtitles.filteredLines.clear()
-        selectedMovie.subtitles.filteredLines.add(selectedLine)
         val snapshotRequest = getSnapshotRequest(
             RequestQueueSingleton.getInstance(this).imageLoader
         )

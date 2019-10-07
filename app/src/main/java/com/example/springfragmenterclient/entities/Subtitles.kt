@@ -9,5 +9,5 @@ data class Subtitles(
     @Expose
     var filename: String,
     @Expose
-    var filteredLines: MutableList<Line> = mutableListOf()
+    val movie: Movie
 ) : Serializable
