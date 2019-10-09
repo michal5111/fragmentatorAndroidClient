@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
-import com.example.springfragmenterclient.adapters.LineRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
+import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.MovieWithLinesRecyclerViewAdapter
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 
@@ -80,7 +80,7 @@ class SearchPhrase : Fragment() {
             requestQueue.addToRequestQueue(
                 viewModel.getMoviesByPhraseRequest(Fragmentator4000.encodeValue(p0.toString()),
                     {
-                        recyclerView.adapter = LineRecyclerViewAdapter(
+                        recyclerView.adapter = LineWithMovieTitleRecyclerViewAdapter(
                             viewModel.lines
                         )
                         progressBar.visibility = View.INVISIBLE
@@ -102,7 +102,7 @@ class SearchPhrase : Fragment() {
         }
 
         override fun onQueryTextChange(p0: String?): Boolean {
-            (recyclerView.adapter as MovieWithLinesRecyclerViewAdapter).filter.filter(p0)
+            (recyclerView.adapter as LineWithMovieTitleRecyclerViewAdapter).filter.filter(p0)
             return false
         }
 

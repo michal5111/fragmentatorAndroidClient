@@ -8,6 +8,7 @@
         tools:context=".activities.SelectedLineActivity">
 
     <TextView
+            android:gravity="top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/SelectedLineTitleTextView"
@@ -19,8 +20,7 @@
             android:textSize="24sp"
             android:textAlignment="center"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/SelectedLineTimeTextView"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintBottom_toTopOf="@+id/SelectedLineTimeTextView"/>
 
     <TextView
             android:layout_width="wrap_content"
@@ -50,12 +50,14 @@
             app:layout_constraintTop_toBottomOf="@+id/SelectedLineTimeTextView"
             android:textAlignment="center"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/SelectedLineEditText"
+            app:layout_constraintBottom_toTopOf="@+id/SelectedLineImageView"
             android:layout_marginBottom="8dp"/>
 
     <com.android.volley.toolbox.NetworkImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             app:srcCompat="@mipmap/ic_launcher_round"
             android:id="@+id/SelectedLineImageView"
             app:layout_constraintStart_toStartOf="parent"
@@ -65,8 +67,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toTopOf="@+id/SelectedLineEditText"
-            app:layout_constraintTop_toBottomOf="@+id/SelectedLineTextView"
-            android:scaleType="fitCenter"/>
+            app:layout_constraintTop_toBottomOf="@+id/SelectedLineTextView" />
 
     <EditText
             android:id="@+id/SelectedLineEditText"

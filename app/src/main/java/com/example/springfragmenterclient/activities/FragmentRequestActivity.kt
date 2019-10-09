@@ -201,8 +201,8 @@ class FragmentRequestActivity : AppCompatActivity() {
     }
 
     private fun createEventSource(): EventSource {
-        val adress = "${Fragmentator4000.apiUrl}/fragmentRequest/${fragmentRequest.id}"
-        return EventSource(adress,eventHandler)
+        val address = "${Fragmentator4000.apiUrl}/fragmentRequest/${fragmentRequest.id}"
+        return EventSource(address,eventHandler)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

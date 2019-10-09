@@ -77,9 +77,12 @@ class SelectedMovieActivity : AppCompatActivity() {
         }
         if (adapter.selectedItems.size() >= 2) {
             selectButton.isEnabled = true
+            val list = lines.filter {
+                adapter.selectedItems.get(lines.lastIndexOf(it), false)
+            }.toList()
             fragmentRequest.apply {
-                startLineId = lines.first().id
-                stopLineId = lines.last().id
+                startLineId = list.first().id
+                stopLineId = list.last().id
             }
         } else {
             selectButton.isEnabled = false
