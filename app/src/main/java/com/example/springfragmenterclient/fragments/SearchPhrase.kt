@@ -16,7 +16,6 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
-import com.example.springfragmenterclient.adapters.MovieWithLinesRecyclerViewAdapter
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 
 class SearchPhrase : Fragment() {
@@ -78,7 +77,8 @@ class SearchPhrase : Fragment() {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
             requestQueue.addToRequestQueue(
-                viewModel.getMoviesByPhraseRequest(Fragmentator4000.encodeValue(p0.toString()),
+                viewModel.getLinesByPhraseRequest(
+                    Fragmentator4000.encodeValue(p0.toString()),
                     {
                         recyclerView.adapter = LineWithMovieTitleRecyclerViewAdapter(
                             viewModel.lines

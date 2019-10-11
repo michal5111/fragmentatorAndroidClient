@@ -13,9 +13,13 @@ import com.example.springfragmenterclient.utils.GsonRequest
 class SearchPhraseViewModel : ViewModel() {
     var lines: List<Line> = emptyList()
 
-    fun getMoviesByPhraseRequest(phrase: String, successListener: () -> Unit, errorListener: (VolleyError) -> Unit) =
+    fun getLinesByPhraseRequest(
+        phrase: String,
+        successListener: () -> Unit,
+        errorListener: (VolleyError) -> Unit
+    ) =
         GsonRequest<List<Line>>(
-            "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase&firstResult=0&maxResults=1000",
+            "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase&page=0&size=1000",
             Fragmentator4000.linesListType,
             mutableMapOf(),
             Response.Listener { response ->

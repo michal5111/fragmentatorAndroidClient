@@ -52,6 +52,7 @@ class SelectedLineActivity : AppCompatActivity() {
             startLineId = selectedLine.id
             stopLineId = selectedLine.id
         }
+        movieTitleTextView.text = selectedMovie.fileName
         movieTimeTextView.text = selectedLine.timeString
         textView.text = HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
