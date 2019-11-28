@@ -8,6 +8,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.entities.page.Page
 import com.example.springfragmenterclient.utils.GsonRequest
 
 class SearchPhraseViewModel : ViewModel() {
@@ -18,12 +19,12 @@ class SearchPhraseViewModel : ViewModel() {
         successListener: () -> Unit,
         errorListener: (VolleyError) -> Unit
     ) =
-        GsonRequest<List<Line>>(
+        GsonRequest<Page<Line>>(
             "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase&page=0&size=1000",
-            Fragmentator4000.linesListType,
+            Fragmentator4000.pageOfLinesType,
             mutableMapOf(),
             Response.Listener { response ->
-                lines = response
+                lines = response.content
                 successListener.invoke()
             },
             Response.ErrorListener { error ->
