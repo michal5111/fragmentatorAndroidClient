@@ -8,7 +8,9 @@ import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
@@ -16,6 +18,7 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
+import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 
 class SearchPhrase : Fragment() {
@@ -30,6 +33,7 @@ class SearchPhrase : Fragment() {
     private lateinit var searchView: SearchView
     private lateinit var filterSearchView: SearchView
     private lateinit var requestQueue: RequestQueueSingleton
+    private lateinit var lineAdapter: LineWithMovieTitleRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,9 +44,10 @@ class SearchPhrase : Fragment() {
         progressBar = root.findViewById(R.id.progressBar3)
         recyclerView = root.findViewById(R.id.RecyclerView)
         filterSearchView = root.findViewById(R.id.filterSearchView)
-        filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
+//        filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
         val viewManager = LinearLayoutManager(context)
         recyclerView.layoutManager = viewManager
+        recyclerView.setHasFixedSize(true)
         searchView.setOnQueryTextListener(onSearchQueryTextListener)
         requestQueue = RequestQueueSingleton.getInstance(context!!)
         return root
@@ -51,6 +56,10 @@ class SearchPhrase : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(SearchPhraseViewModel::class.java)
+        viewModel.linePagedList.observe(this,
+            Observer<PagedList<Line>> { t -> lineAdapter.submitList(t) })
+        lineAdapter = LineWithMovieTitleRecyclerViewAdapter()
+        recyclerView.adapter = lineAdapter
     }
 
 
@@ -76,35 +85,38 @@ class SearchPhrase : Fragment() {
         override fun onQueryTextSubmit(p0: String?): Boolean {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
-            requestQueue.addToRequestQueue(
-                viewModel.getLinesByPhraseRequest(
-                    Fragmentator4000.encodeValue(p0.toString()),
-                    {
-                        recyclerView.adapter = LineWithMovieTitleRecyclerViewAdapter(
-                            viewModel.lines
-                        )
-                        progressBar.visibility = View.INVISIBLE
-                    },
-                    { error ->
-                        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-                        progressBar.visibility = View.INVISIBLE
-                    })
-            )
+//            requestQueue.addToRequestQueue(
+//                viewModel.getLinesByPhraseRequest(
+//                    Fragmentator4000.encodeValue(p0.toString()),
+//                    0,
+//                    50,
+//                    {
+//                        recyclerView.adapter = LineWithMovieTitleRecyclerViewAdapter(
+//                            viewModel.lines
+//                        )
+//                        progressBar.visibility = View.INVISIBLE
+//                    },
+//                    { error ->
+//                        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+//                        progressBar.visibility = View.INVISIBLE
+//                    })
+//            )
+            viewModel.createLiveData(p0.toString())
             searchView.clearFocus()
             filterSearchView.visibility = View.VISIBLE
             return true
         }
     }
 
-    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
-        override fun onQueryTextSubmit(p0: String?): Boolean {
-            return false
-        }
-
-        override fun onQueryTextChange(p0: String?): Boolean {
-            (recyclerView.adapter as LineWithMovieTitleRecyclerViewAdapter).filter.filter(p0)
-            return false
-        }
-
-    }
+//    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
+//        override fun onQueryTextSubmit(p0: String?): Boolean {
+//            return false
+//        }
+//
+//        override fun onQueryTextChange(p0: String?): Boolean {
+//            (recyclerView.adapter as LineWithMovieTitleRecyclerViewAdapter).filter.filter(p0)
+//            return false
+//        }
+//
+//    }
 }

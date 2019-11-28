@@ -4,55 +4,27 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.text.HtmlCompat
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
 
-class LineWithMovieTitleRecyclerViewAdapter(private val dataSetFull: List<Line>)
-    : RecyclerView.Adapter<LineWithMovieTitleRecyclerViewAdapter.ViewHolder>(), Filterable {
-
-    private val dataSet = mutableListOf<Line>()
-
-    override fun getFilter(): Filter {
-        return filterByTitle
-    }
-
-    private val filterByTitle = object : Filter() {
-        override fun performFiltering(p0: CharSequence?): FilterResults {
-            val filteredList: MutableList<Line> = emptyList<Line>().toMutableList()
-            if (p0.isNullOrBlank()) {
-                filteredList.addAll(dataSetFull)
-            } else {
-                val pattern = p0.toString().toUpperCase().replace('.', ' ').trim()
-                dataSetFull.forEach {
-                    if (it.subtitles.movie.fileName.toUpperCase().replace('.', ' ').contains(pattern)) {
-                        filteredList.add(it)
-                    }
-                }
-            }
-            val filteredResults = FilterResults()
-            filteredResults.values = filteredList
-            return filteredResults
+class LineWithMovieTitleRecyclerViewAdapter :
+    PagedListAdapter<Line, LineWithMovieTitleRecyclerViewAdapter.ViewHolder>(object :
+        DiffUtil.ItemCallback<Line>() {
+        override fun areItemsTheSame(oldItem: Line, newItem: Line): Boolean {
+            return oldItem.id == newItem.id
         }
 
-        override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
-            dataSet.clear()
-            dataSet.addAll(p1!!.values as MutableList<Line>)
-            notifyDataSetChanged()
+        override fun areContentsTheSame(oldItem: Line, newItem: Line): Boolean {
+            return oldItem == newItem
         }
-
-    }
-
-    init {
-        dataSet.addAll(dataSetFull)
-    }
+    }) {
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val titleTextView: TextView = v.findViewById(R.id.TitleTextView)
@@ -68,14 +40,22 @@ class LineWithMovieTitleRecyclerViewAdapter(private val dataSetFull: List<Line>)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.apply {
-            titleTextView.text = dataSet[position].subtitles.movie.fileName
-            timeTextView.text = dataSet[position].timeString
-            lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
-            cardView.setOnClickListener {
-                (this.lineTextView.context as MainActivity).selectLine(dataSet[position].subtitles.movie,dataSet[position])
+        val line: Line? = getItem(position)
+        if (line != null) {
+            viewHolder.apply {
+                titleTextView.text = line.subtitles.movie.fileName
+                timeTextView.text = line.timeString
+                lineTextView.text =
+                    HtmlCompat.fromHtml(line.textLines, Html.FROM_HTML_MODE_LEGACY)
+                cardView.setOnClickListener {
+                    (this.lineTextView.context as MainActivity).selectLine(
+                        line.subtitles.movie,
+                        line
+                    )
+                }
             }
         }
     }
-    override fun getItemCount() = dataSet.size
+
+//    override fun getItemCount() = dataSet.size
 }
