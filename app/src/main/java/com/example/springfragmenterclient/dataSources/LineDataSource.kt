@@ -2,7 +2,6 @@ package com.example.springfragmenterclient.dataSources
 
 import android.content.Context
 import androidx.paging.PageKeyedDataSource
-import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.entities.Line
@@ -14,7 +13,7 @@ class LineDataSource(val phrase: String, private val context: Context) : PageKey
 
     companion object {
         const val PAGE_SIZE = 50
-        const val FIRST_PAGE = 1
+        const val FIRST_PAGE = 0
     }
 
     private val requestQueue: RequestQueueSingleton = RequestQueueSingleton.getInstance(context)
@@ -33,13 +32,7 @@ class LineDataSource(val phrase: String, private val context: Context) : PageKey
                 },
                 Response.ErrorListener { error ->
                 }
-            ).apply {
-                retryPolicy = DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                )
-            }
+            )
         )
     }
 
@@ -57,13 +50,7 @@ class LineDataSource(val phrase: String, private val context: Context) : PageKey
                 },
                 Response.ErrorListener { error ->
                 }
-            ).apply {
-                retryPolicy = DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                )
-            }
+            )
         )
     }
 
@@ -81,13 +68,7 @@ class LineDataSource(val phrase: String, private val context: Context) : PageKey
                 },
                 Response.ErrorListener { error ->
                 }
-            ).apply {
-                retryPolicy = DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                )
-            }
+            )
         )
     }
 }

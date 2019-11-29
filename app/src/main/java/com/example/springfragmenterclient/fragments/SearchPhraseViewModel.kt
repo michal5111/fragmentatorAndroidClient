@@ -17,7 +17,6 @@ import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.utils.GsonRequest
 
 class SearchPhraseViewModel(application: Application) : AndroidViewModel(application) {
-//    var lines: List<Line> = emptyList()
 
     lateinit var linePagedList: LiveData<PagedList<Line>>
     private lateinit var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>>
