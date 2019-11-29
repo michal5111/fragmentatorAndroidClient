@@ -1,13 +1,13 @@
 package com.example.springfragmenterclient.fragments
 
+import android.app.Application
 import android.database.Cursor
 import android.database.MatrixCursor
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
-import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.example.springfragmenterclient.Fragmentator4000
@@ -16,39 +16,11 @@ import com.example.springfragmenterclient.dataSources.LineDataSourceFactory
 import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.utils.GsonRequest
 
-class SearchPhraseViewModel : ViewModel() {
+class SearchPhraseViewModel(application: Application) : AndroidViewModel(application) {
 //    var lines: List<Line> = emptyList()
 
     lateinit var linePagedList: LiveData<PagedList<Line>>
     private lateinit var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>>
-
-    init {
-        createLiveData("")
-    }
-
-//    fun getLinesByPhraseRequest(
-//        phrase: String,
-//        successListener: () -> Unit,
-//        errorListener: (VolleyError) -> Unit
-//    ) =
-//        GsonRequest<Page<Line>>(
-//            "${Fragmentator4000.apiUrl}/searchPhrase?phrase=$phrase&page=$page&size=$size",
-//            Fragmentator4000.pageOfLinesType,
-//            mutableMapOf(),
-//            Response.Listener { response ->
-//                lines = response.content
-//                successListener.invoke()
-//            },
-//            Response.ErrorListener { error ->
-//                errorListener.invoke(error)
-//            }
-//        ).apply {
-//            retryPolicy = DefaultRetryPolicy(
-//                20000,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-//            )
-//        }
 
     fun getHints(phrase: String, successListener: (Cursor) -> Unit, errorListener: (VolleyError) -> Unit) =
         GsonRequest<List<Line>>(
@@ -70,16 +42,10 @@ class SearchPhraseViewModel : ViewModel() {
             Response.ErrorListener { error ->
                 errorListener.invoke(error)
             }
-        ).apply {
-            retryPolicy = DefaultRetryPolicy(
-                20000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
-        }
+        )
 
     fun createLiveData(phrase: String) {
-        val lineDataSourceFactory = LineDataSourceFactory(phrase)
+        val lineDataSourceFactory = LineDataSourceFactory(phrase, getApplication())
         liveDataSource = lineDataSourceFactory.lineLiveData
 
         val config: PagedList.Config = PagedList.Config.Builder()

@@ -44,7 +44,6 @@ class SearchPhrase : Fragment() {
         progressBar = root.findViewById(R.id.progressBar3)
         recyclerView = root.findViewById(R.id.RecyclerView)
         filterSearchView = root.findViewById(R.id.filterSearchView)
-//        filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
         val viewManager = LinearLayoutManager(context)
         recyclerView.layoutManager = viewManager
         recyclerView.setHasFixedSize(true)
@@ -56,11 +55,18 @@ class SearchPhrase : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(SearchPhraseViewModel::class.java)
-        viewModel.linePagedList.observe(this,
-            Observer<PagedList<Line>> { t -> lineAdapter.submitList(t) })
         lineAdapter = LineWithMovieTitleRecyclerViewAdapter()
         recyclerView.adapter = lineAdapter
     }
+
+    private fun setObserver() {
+        viewModel.linePagedList.observe(this,
+            Observer<PagedList<Line>> {
+                    t -> lineAdapter.submitList(t)
+                    progressBar.visibility = View.INVISIBLE
+            })
+    }
+
 
 
     private val onSearchQueryTextListener = object : SearchView.OnQueryTextListener {
@@ -85,23 +91,8 @@ class SearchPhrase : Fragment() {
         override fun onQueryTextSubmit(p0: String?): Boolean {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
-//            requestQueue.addToRequestQueue(
-//                viewModel.getLinesByPhraseRequest(
-//                    Fragmentator4000.encodeValue(p0.toString()),
-//                    0,
-//                    50,
-//                    {
-//                        recyclerView.adapter = LineWithMovieTitleRecyclerViewAdapter(
-//                            viewModel.lines
-//                        )
-//                        progressBar.visibility = View.INVISIBLE
-//                    },
-//                    { error ->
-//                        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-//                        progressBar.visibility = View.INVISIBLE
-//                    })
-//            )
             viewModel.createLiveData(p0.toString())
+            setObserver()
             searchView.clearFocus()
             filterSearchView.visibility = View.VISIBLE
             return true
