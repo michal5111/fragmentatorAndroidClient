@@ -1,14 +1,18 @@
 package com.example.springfragmenterclient.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
 import android.text.Html
-import android.text.TextWatcher
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.ImageLoader
@@ -16,12 +20,11 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.NetworkImageView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
-import com.example.springfragmenterclient.entities.Response
+import com.example.springfragmenterclient.adapters.LineEditViewAdapter
+import com.example.springfragmenterclient.entities.*
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
+import java.util.*
 
 class SelectedLineActivity : AppCompatActivity() {
 
@@ -33,9 +36,10 @@ class SelectedLineActivity : AppCompatActivity() {
     private lateinit var selectedLine: Line
     private lateinit var progressBar: ProgressBar
     private lateinit var downloadButton: Button
-    private lateinit var editText: EditText
+    private lateinit var lineEditRecyclerView: RecyclerView
     private var fragmentRequest: FragmentRequest = FragmentRequest()
 
+    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_line)
@@ -44,7 +48,7 @@ class SelectedLineActivity : AppCompatActivity() {
         movieTitleTextView = findViewById(R.id.SelectedLineTitleTextView)
         textView = findViewById(R.id.SelectedLineTextView)
         progressBar = findViewById(R.id.SelectedLineProgressBar)
-        editText = findViewById(R.id.SelectedLineEditText)
+        lineEditRecyclerView = findViewById(R.id.LineEditRecyclerView)
         selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
         fragmentRequest.apply {
@@ -60,11 +64,12 @@ class SelectedLineActivity : AppCompatActivity() {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)
                 putExtra("FRAGMENT_REQUEST", fragmentRequest)
+                putExtra("EDITS_LIST", getLineEdits())
             }
             startActivity(intent)
         }
-        editText.setText(HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY))
-        editText.addTextChangedListener(editTextTextWatcher)
+        lineEditRecyclerView.layoutManager = LinearLayoutManager(this)
+        lineEditRecyclerView.adapter = LineEditViewAdapter(listOf(selectedLine))
         val dialogButton: Button = findViewById(R.id.Dialog)
         dialogButton.setOnClickListener {
             val intent = Intent(applicationContext, SelectedMovieActivity::class.java).apply {
@@ -106,13 +111,22 @@ class SelectedLineActivity : AppCompatActivity() {
         )
     }
 
-    private val editTextTextWatcher = object : TextWatcher {
-        override fun afterTextChanged(p0: Editable?) {
-            selectedLine.textLines = p0.toString()
+    private fun getLineEdits(): ArrayList<LineEdit> {
+        val editsList = ArrayList<LineEdit>()
+        for (i in 0 until lineEditRecyclerView.childCount) {
+            val holder: LineEditViewAdapter.ViewHolder = lineEditRecyclerView
+                .getChildViewHolder(lineEditRecyclerView.getChildAt(i)) as LineEditViewAdapter.ViewHolder
+            if (holder.edited) {
+                editsList.add(
+                    LineEdit(
+                        null,
+                        fragmentRequest.id,
+                        selectedLine.id,
+                        holder.lineTextEdit.text.toString()
+                    )
+                )
+            }
         }
-
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        return editsList
     }
 }
