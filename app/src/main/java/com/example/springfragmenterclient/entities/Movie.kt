@@ -6,7 +6,7 @@ import java.io.Serializable
 
 data class Movie(
     @Expose
-    var id: Long,
+    var id: Long?,
     @Expose
     var subtitles: Number,
     @Expose

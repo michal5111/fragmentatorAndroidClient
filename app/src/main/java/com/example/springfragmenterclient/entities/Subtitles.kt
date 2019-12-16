@@ -5,7 +5,7 @@ import java.io.Serializable
 
 data class Subtitles(
     @Expose
-    var id: Long,
+    var id: Long?,
     @Expose
     var filename: String,
     @Expose

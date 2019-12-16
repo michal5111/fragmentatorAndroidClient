@@ -9,7 +9,7 @@ import com.example.springfragmenterclient.entities.page.Page
 import com.example.springfragmenterclient.utils.GsonRequest
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 
-class LineDataSource(val phrase: String, private val context: Context) : PageKeyedDataSource<Long, Line>() {
+class LineDataSource(private val phrase: String, context: Context) : PageKeyedDataSource<Long, Line>() {
 
     companion object {
         const val PAGE_SIZE = 50

@@ -6,8 +6,7 @@ import java.io.Serializable
 data class LineEdit(
     val id: Long?,
 
-    @Expose
-    var fragmentRequestId: Long,
+    var fragmentRequestId: Long?,
 
     @Expose
     val lineId: Long,

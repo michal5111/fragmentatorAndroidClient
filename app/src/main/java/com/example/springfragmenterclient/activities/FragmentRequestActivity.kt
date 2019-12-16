@@ -20,22 +20,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.LineEdit
 import com.example.springfragmenterclient.entities.Movie
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
 import com.star_zero.sse.EventHandler
 import com.star_zero.sse.EventSource
 import com.star_zero.sse.MessageEvent
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
@@ -66,7 +62,6 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var fragmentRequest: FragmentRequest
     private val gson: Gson = Gson()
     private lateinit var requestQueue: RequestQueueSingleton
-    private lateinit var editsList: ArrayList<LineEdit>
 
     private object RequestCodes {
             const val DOWNLOAD_PERMISSION_REQUEST = 0
@@ -78,7 +73,6 @@ class FragmentRequestActivity : AppCompatActivity() {
         setContentView(R.layout.activity_fragment_request)
         movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         fragmentRequest = intent.getSerializableExtra("FRAGMENT_REQUEST") as FragmentRequest
-        editsList = intent.getSerializableExtra("EDITS_LIST") as ArrayList<LineEdit>
         textView = findViewById(R.id.event_text)
         openButton = findViewById(R.id.open_button)
         downloadButton = findViewById(R.id.download_button)
@@ -321,42 +315,11 @@ class FragmentRequestActivity : AppCompatActivity() {
         jsonObject: JSONObject
     ) = JsonObjectRequest(
         Request.Method.POST, "${Fragmentator4000.apiUrl}/fragmentRequest", jsonObject,
-        com.android.volley.Response.Listener { response ->
+        Response.Listener { response ->
             val gson = Gson()
             val json =
                 gson.fromJson(response.toString(), FragmentRequest::class.java)
             fragmentRequest = json
-            if (editsList.isNotEmpty()) {
-                editsList.forEach {
-                    it.fragmentRequestId = fragmentRequest.id
-                }
-                fragmentRequest.lineEdits.addAll(editsList)
-                Log.d("JSON", gson.toJson(fragmentRequest))
-                requestQueue.addToRequestQueue(postLineEdits(JSONArray(gson.toJson(editsList))))
-            } else {
-                eventSource = createEventSource()
-                eventSource.connect()
-            }
-        },
-        com.android.volley.Response.ErrorListener { error ->
-            progressBar.visibility = View.INVISIBLE
-            Toast.makeText(applicationContext, "error " + error.message, Toast.LENGTH_SHORT).show()
-        }
-    ).apply {
-        retryPolicy = DefaultRetryPolicy(
-            1000,
-            20,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-    }
-
-    private fun postLineEdits(
-        jsonArray: JSONArray
-    ) = JsonArrayRequest(
-        Request.Method.POST,
-        "http://michal5111.ddns.net:8080/fragmentatorServer/lineEdits",
-        jsonArray,
-        Response.Listener {
             eventSource = createEventSource()
             eventSource.connect()
         },
@@ -364,11 +327,5 @@ class FragmentRequestActivity : AppCompatActivity() {
             progressBar.visibility = View.INVISIBLE
             Toast.makeText(applicationContext, "error " + error.message, Toast.LENGTH_SHORT).show()
         }
-    ).apply {
-        retryPolicy = DefaultRetryPolicy(
-            1000,
-            20,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-    }
+    )
 }

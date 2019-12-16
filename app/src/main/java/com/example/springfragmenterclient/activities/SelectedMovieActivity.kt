@@ -42,7 +42,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(getLines(selectedMovie.id))
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(getLines(selectedMovie.id!!))
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)

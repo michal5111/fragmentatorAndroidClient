@@ -7,7 +7,7 @@ import java.io.Serializable
 
 data class Line(
     @Expose
-    var id: Long,
+    var id: Long?,
     @Expose
     var number: Int,
     @Expose

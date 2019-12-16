@@ -24,7 +24,6 @@ import com.example.springfragmenterclient.adapters.LineEditViewAdapter
 import com.example.springfragmenterclient.entities.*
 import com.example.springfragmenterclient.utils.RequestQueueSingleton
 import com.google.gson.Gson
-import java.util.*
 
 class SelectedLineActivity : AppCompatActivity() {
 
@@ -61,10 +60,11 @@ class SelectedLineActivity : AppCompatActivity() {
         textView.text = HtmlCompat.fromHtml(selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
         downloadButton.setOnClickListener {
+            setLineEdits()
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
                 putExtra("SELECTED_MOVIE", selectedMovie)
                 putExtra("FRAGMENT_REQUEST", fragmentRequest)
-                putExtra("EDITS_LIST", getLineEdits())
+                //putExtra("EDITS_LIST", getLineEdits())
             }
             startActivity(intent)
         }
@@ -111,22 +111,21 @@ class SelectedLineActivity : AppCompatActivity() {
         )
     }
 
-    private fun getLineEdits(): ArrayList<LineEdit> {
-        val editsList = ArrayList<LineEdit>()
+    private fun setLineEdits() {
+        fragmentRequest.lineEdits.clear()
         for (i in 0 until lineEditRecyclerView.childCount) {
             val holder: LineEditViewAdapter.ViewHolder = lineEditRecyclerView
                 .getChildViewHolder(lineEditRecyclerView.getChildAt(i)) as LineEditViewAdapter.ViewHolder
             if (holder.edited) {
-                editsList.add(
+                fragmentRequest.lineEdits.add(
                     LineEdit(
                         null,
-                        fragmentRequest.id,
-                        selectedLine.id,
+                        null,
+                        selectedLine.id!!,
                         holder.lineTextEdit.text.toString()
                     )
                 )
             }
         }
-        return editsList
     }
 }
