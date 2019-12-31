@@ -5,8 +5,6 @@ import android.app.Application
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
-import com.example.springfragmenterclient.entities.page.Page
 import com.google.gson.reflect.TypeToken
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -18,9 +16,7 @@ class Fragmentator4000 : Application() {
         private const val serverUrl = "http://michal5111.ddns.net:8080/fragmentatorServer"
         const val apiUrl = "$serverUrl/api"
         const val fragmentsUrl = "$serverUrl/fragments"
-        val movieListType = object : TypeToken<List<Movie>>() {}.type!!
         val linesListType = object : TypeToken<List<Line>>() {}.type!!
-        val pageOfLinesType = object : TypeToken<Page<Line>>() {}.type!!
 
         fun timeToSeconds(time: String): Double {
             val split = time.split(":")

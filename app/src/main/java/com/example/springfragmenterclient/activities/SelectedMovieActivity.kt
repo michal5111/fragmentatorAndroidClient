@@ -1,5 +1,6 @@
 package com.example.springfragmenterclient.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -7,67 +8,51 @@ import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Response
-import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.entities.Movie
-import com.example.springfragmenterclient.utils.GsonRequest
-import com.example.springfragmenterclient.utils.RequestQueueSingleton
+import io.reactivex.rxkotlin.subscribeBy
 
 class SelectedMovieActivity : AppCompatActivity() {
 
-    private lateinit var selectedMovie: Movie
-    private lateinit var lines: List<Line>
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var selectButton: Button
     private lateinit var filterSearchView: SearchView
-    private var fragmentRequest: FragmentRequest = FragmentRequest()
+    private lateinit var viewModel: SelectedMovieViewModel
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_movie)
-        selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
+        viewModel = ViewModelProviders.of(this)[SelectedMovieViewModel::class.java]
+        viewModel.selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         recyclerView = findViewById(R.id.RecyclerView)
         selectButton = findViewById(R.id.button)
-        fragmentRequest.apply {
-            movieId = selectedMovie.id
+        viewModel.fragmentRequest.apply {
+            movieId = viewModel.selectedMovie.id
         }
         val viewManager = LinearLayoutManager(this)
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
-        movieTitleTextView.text = selectedMovie.fileName
+        movieTitleTextView.text = viewModel.selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(getLines(selectedMovie.id!!))
+        viewModel.getLines(viewModel.selectedMovie.id!!)
+            .subscribeBy(
+                onNext = { onResponseListener() },
+                onError = { Toast.makeText(applicationContext, "error " + it.localizedMessage, Toast.LENGTH_SHORT).show() }
+            )
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", selectedMovie)
-                putExtra("FRAGMENT_REQUEST", fragmentRequest)
+                putExtra("SELECTED_MOVIE", viewModel.selectedMovie)
+                putExtra("FRAGMENT_REQUEST", viewModel.fragmentRequest)
             }
             startActivity(intent)
         }
         filterSearchView = findViewById(R.id.filterSearchView)
         filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
-    }
-
-    private fun getLines(movieId: Long) = GsonRequest<List<Line>>(
-        "${Fragmentator4000.apiUrl}/getLines?movieId=$movieId",
-        Fragmentator4000.linesListType,
-        mutableMapOf(),
-        Response.Listener { response -> onResponseListener(response) },
-        Response.ErrorListener { error ->
-            Toast.makeText(applicationContext, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-        }
-    ).apply {
-        retryPolicy = DefaultRetryPolicy(
-            20000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
     }
 
     private fun onLinesSelectedListener(adapter: DialogLineRecyclerViewAdapter) {
@@ -77,21 +62,14 @@ class SelectedMovieActivity : AppCompatActivity() {
         }
         if (adapter.selectedItems.size() >= 2) {
             selectButton.isEnabled = true
-            val list = lines.filter {
-                adapter.selectedItems.get(lines.lastIndexOf(it), false)
-            }.toList()
-            fragmentRequest.apply {
-                startLineId = list.first().id
-                stopLineId = list.last().id
-            }
+            viewModel.onLinesSelected(adapter)
         } else {
             selectButton.isEnabled = false
         }
     }
 
-    private fun onResponseListener(response: List<Line>) {
-        lines = response
-        recyclerView.adapter = DialogLineRecyclerViewAdapter(lines).apply {
+    private fun onResponseListener() {
+        recyclerView.adapter = DialogLineRecyclerViewAdapter(viewModel.lines).apply {
             setOnLinesSelectedListener { adapter -> onLinesSelectedListener(adapter) }
         }
         if (intent.hasExtra("POSITION")) {

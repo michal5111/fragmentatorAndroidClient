@@ -22,6 +22,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 dependencies {
@@ -38,8 +46,13 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.android.volley:volley:1.1.1'
-    implementation 'com.star_zero:sse:1.2.0'
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation 'android.arch.paging:runtime:1.0.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.7.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.0'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.10'
+    implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation("io.coil-kt:coil:0.8.0")
 }

@@ -1,5 +1,7 @@
 package com.example.springfragmenterclient.fragments
 
+import android.annotation.SuppressLint
+import android.database.MatrixCursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +21,8 @@ import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
 import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.utils.RequestQueueSingleton
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 
 class SearchPhrase : Fragment() {
 
@@ -32,8 +35,8 @@ class SearchPhrase : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
     private lateinit var filterSearchView: SearchView
-    private lateinit var requestQueue: RequestQueueSingleton
     private lateinit var lineAdapter: LineWithMovieTitleRecyclerViewAdapter
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,7 +51,6 @@ class SearchPhrase : Fragment() {
         recyclerView.layoutManager = viewManager
         recyclerView.setHasFixedSize(true)
         searchView.setOnQueryTextListener(onSearchQueryTextListener)
-        requestQueue = RequestQueueSingleton.getInstance(context!!)
         return root
     }
 
@@ -70,20 +72,14 @@ class SearchPhrase : Fragment() {
 
 
     private val onSearchQueryTextListener = object : SearchView.OnQueryTextListener {
+        @SuppressLint("CheckResult")
         override fun onQueryTextChange(p0: String?): Boolean {
-            requestQueue.addToRequestQueue(
-                viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()),
-                    { cursor ->
-                        searchView.suggestionsAdapter = LineSuggestionsCursorAdapter(
-                            context!!,
-                            cursor,
-                            true,
-                            searchView
-                        )
-                    },
-                    { error ->
-                        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-                    })
+            compositeDisposable.add(
+                viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
+                    .subscribeBy(
+                        onNext = {createAdapter(it)},
+                        onError = {showError(it)}
+                    )
             )
             return false
         }
@@ -99,7 +95,25 @@ class SearchPhrase : Fragment() {
         }
     }
 
-//    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
+    private fun createAdapter(cursor: MatrixCursor) {
+        searchView.suggestionsAdapter = LineSuggestionsCursorAdapter(
+            context!!,
+            cursor,
+            true,
+            searchView
+        )
+    }
+
+    private fun showError(error: Throwable) {
+        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
+    }
+
+    //    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
 //        override fun onQueryTextSubmit(p0: String?): Boolean {
 //            return false
 //        }

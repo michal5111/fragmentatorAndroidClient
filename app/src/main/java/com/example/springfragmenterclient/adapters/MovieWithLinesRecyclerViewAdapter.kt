@@ -67,10 +67,6 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
         viewHolder.apply {
             lineRecyclerView.layoutManager = LinearLayoutManager(viewHolder.lineRecyclerView.context)
             titleTextView.text = dataSet[position].fileName
-//            for (line in dataSet[position].subtitles.filteredLines) {
-//                line.parent = dataSet[position]
-//            }
-//            lineRecyclerView.adapter = LineRecyclerViewAdapter(dataSet[position].subtitles.filteredLines)
         }
     }
     override fun getItemCount() = dataSet.size

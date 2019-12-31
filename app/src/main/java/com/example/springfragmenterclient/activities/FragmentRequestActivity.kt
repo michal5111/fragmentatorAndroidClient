@@ -13,33 +13,26 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
+import androidx.lifecycle.ViewModelProviders
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.entities.FragmentRequest
 import com.example.springfragmenterclient.entities.Movie
-import com.example.springfragmenterclient.utils.RequestQueueSingleton
-import com.google.gson.Gson
-import com.star_zero.sse.EventHandler
-import com.star_zero.sse.EventSource
-import com.star_zero.sse.MessageEvent
-import org.json.JSONObject
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import java.io.File
 
 
 class FragmentRequestActivity : AppCompatActivity() {
 
+    private lateinit var viewModel: FragmentRequestViewModel
     private lateinit var movie: Movie
-    private lateinit var eventSource: EventSource
     private lateinit var textView: TextView
     private lateinit var openButton: Button
     private lateinit var convertButton: Button
@@ -52,27 +45,21 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var downloadManager: DownloadManager
     private lateinit var videoView: VideoView
     private lateinit var progressBar: ProgressBar
-    private var message: String = ""
-    private var percent: Double = 0.0
-    private var to: Double = 0.0
-    private var lastDownload: Long = -1L
-    private var lastShare: Long = -1L
-    private lateinit var fileName: String
     private lateinit var mediaController: MediaController
-    private lateinit var fragmentRequest: FragmentRequest
-    private val gson: Gson = Gson()
-    private lateinit var requestQueue: RequestQueueSingleton
+    private val compositeDisposable = CompositeDisposable()
 
     private object RequestCodes {
-            const val DOWNLOAD_PERMISSION_REQUEST = 0
-            const val SHARE_PERMISSION_REQUEST = 1
+        const val DOWNLOAD_PERMISSION_REQUEST = 0
+        const val SHARE_PERMISSION_REQUEST = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProviders.of(this).get(FragmentRequestViewModel::class.java)
         setContentView(R.layout.activity_fragment_request)
         movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-        fragmentRequest = intent.getSerializableExtra("FRAGMENT_REQUEST") as FragmentRequest
+        viewModel.fragmentRequest =
+            intent.getSerializableExtra("FRAGMENT_REQUEST") as FragmentRequest
         textView = findViewById(R.id.event_text)
         openButton = findViewById(R.id.open_button)
         downloadButton = findViewById(R.id.download_button)
@@ -93,43 +80,64 @@ class FragmentRequestActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         startOffsetEditText.addTextChangedListener(startOffsetTextWatcher)
         stopOffsetEditText.addTextChangedListener(stopOffsetTextWatcher)
-        eventSource = createEventSource()
         convertButton.setOnClickListener {
-            conversionProgressBar.progress = 0
-            convertButton.isEnabled = false
-            val json = gson.toJson(fragmentRequest)
-            Log.d("JSON", json)
-            requestQueue.addToRequestQueue(postFragmentRequest(JSONObject(json)))
+            compositeDisposable.add(
+                viewModel.saveFragmentRequest(viewModel.fragmentRequest).toObservable().
+                    flatMap { afterPostObservable(it) }
+                    .doOnSubscribe {
+                        conversionProgressBar.progress = 0
+                        convertButton.isEnabled = false
+                    }
+                    .subscribeBy(
+                        onError = {
+                            Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
+                                .show()
+                            textView.post { textView.text = it.stackTrace.contentToString() }
+                        }
+                    )
+            )
+
         }
         downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-        requestQueue = RequestQueueSingleton.getInstance(applicationContext!!)
     }
 
     fun shareFile(uri: Uri) {
         val dir = File(getExternalFilesDir(null), "cache")
         val videoFile = File(dir, uri.lastPathSegment!!).apply { deleteOnExit() }
         val shareFileUri =
-            FileProvider.getUriForFile(this, "com.example.springfragmenterclient.fileprovider", videoFile)
+            FileProvider.getUriForFile(
+                this,
+                "com.example.springfragmenterclient.fileprovider",
+                videoFile
+            )
         val shareVideoIntent = Intent().apply {
             action = Intent.ACTION_SEND
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             setDataAndType(shareFileUri, contentResolver.getType(shareFileUri))
             putExtra(Intent.EXTRA_STREAM, shareFileUri)
         }
-        startActivity(Intent.createChooser(shareVideoIntent, resources.getString(R.string.shareFragment)))
+        startActivity(
+            Intent.createChooser(
+                shareVideoIntent,
+                resources.getString(R.string.shareFragment)
+            )
+        )
     }
 
     private val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            Toast.makeText(p0, resources.getString(R.string.downloadComplete), Toast.LENGTH_SHORT).show()
-            if (lastShare != -1L) {
-                val c: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(lastShare))
+            Toast.makeText(p0, resources.getString(R.string.downloadComplete), Toast.LENGTH_SHORT)
+                .show()
+            if (viewModel.lastShare != -1L) {
+                val c: Cursor =
+                    downloadManager.query(DownloadManager.Query().setFilterById(viewModel.lastShare))
                 if (c.moveToFirst()) {
                     val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        val movieURI = Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)))
-                        lastShare = -1L
+                        val movieURI =
+                            Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)))
+                        viewModel.lastShare = -1L
                         shareFile(movieURI)
                     }
                 }
@@ -140,14 +148,14 @@ class FragmentRequestActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(onComplete)
-        eventSource.close()
+        compositeDisposable.clear()
     }
 
     private fun downloadManagerEnqueueForSharing(fileName: String) = downloadManager.enqueue(
         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(false)
-            .setTitle("Fragment: " + movie.fileName + fragmentRequest.startLineId)
+            .setTitle("Fragment: " + movie.fileName + viewModel.fragmentRequest.startLineId)
             .setDescription(movie.fileName)
             .setDestinationInExternalFilesDir(
                 this@FragmentRequestActivity,
@@ -160,7 +168,7 @@ class FragmentRequestActivity : AppCompatActivity() {
         DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(false)
-            .setTitle("Fragment: " + movie.fileName + fragmentRequest.startLineId)
+            .setTitle("Fragment: " + movie.fileName + viewModel.fragmentRequest.startLineId)
             .setDescription(movie.fileName)
             .setDestinationInExternalPublicDir(
                 Environment.DIRECTORY_DOWNLOADS,
@@ -184,7 +192,7 @@ class FragmentRequestActivity : AppCompatActivity() {
                 RequestCodes.DOWNLOAD_PERMISSION_REQUEST
             )
         } else {
-            lastDownload = downloadManagerEnqueueForDownload(fileName)
+            viewModel.lastDownload = downloadManagerEnqueueForDownload(fileName)
         }
     }
 
@@ -196,26 +204,25 @@ class FragmentRequestActivity : AppCompatActivity() {
                 RequestCodes.SHARE_PERMISSION_REQUEST
             )
         } else {
-            lastShare = downloadManagerEnqueueForSharing(fileName)
+            viewModel.lastShare = downloadManagerEnqueueForSharing(fileName)
         }
     }
 
-    private fun createEventSource(): EventSource {
-        val address = "${Fragmentator4000.apiUrl}/fragmentRequest/${fragmentRequest.id}"
-        return EventSource(address,eventHandler)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             RequestCodes.DOWNLOAD_PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    downloadManagerEnqueueForDownload(fileName)
+                    downloadManagerEnqueueForDownload(viewModel.fileName)
                 }
             }
             RequestCodes.SHARE_PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    downloadManagerEnqueueForSharing(fileName)
+                    downloadManagerEnqueueForSharing(viewModel.fileName)
                 }
             }
         }
@@ -224,9 +231,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private val stopOffsetTextWatcher = object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
             try {
-                fragmentRequest.stopOffset = p0.toString().toDouble()
+                viewModel.fragmentRequest.stopOffset = p0.toString().toDouble()
             } catch (e: Exception) {
-                fragmentRequest.stopOffset = 0.0
+                viewModel.fragmentRequest.stopOffset = 0.0
             }
         }
 
@@ -243,9 +250,9 @@ class FragmentRequestActivity : AppCompatActivity() {
     private val startOffsetTextWatcher = object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
             try {
-                fragmentRequest.startOffset = p0.toString().toDouble()
+                viewModel.fragmentRequest.startOffset = p0.toString().toDouble()
             } catch (e: Exception) {
-                fragmentRequest.startOffset = 0.0
+                viewModel.fragmentRequest.startOffset = 0.0
             }
         }
 
@@ -259,73 +266,32 @@ class FragmentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private val eventHandler = object : EventHandler {
-        override fun onError(e: java.lang.Exception?) {
-            eventSource.close()
-            textView.post { textView.text = resources.getString(R.string.error, e.toString()) }
-        }
-
-        override fun onOpen() {
-            message = ""
-            textView.post { textView.text = message }
-        }
-
-        override fun onMessage(messageEvent: MessageEvent) {
-            if (messageEvent.event.isNullOrBlank() || messageEvent.data.isBlank()) {
-                return
-            }
-            message = message.plus(messageEvent.data).plus("\n")
-            if (messageEvent.event.equals("to")) {
-                to = messageEvent.data.toDouble()
-            }
-            if (messageEvent.event.equals("log")) {
-                if (messageEvent.data.contains("frame=")) {
-                    val offset = messageEvent.data.lastIndexOf("time=")
-                    val time = messageEvent.data.substring(offset + 5, offset + 16)
-                    percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
-                    conversionProgressBar.progress = percent.toInt()
-                }
-                textView.post { textView.text = message }
-                scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
-            }
-            if (messageEvent.event.equals("complete")) {
-                fileName = messageEvent.data
-                eventSource.close()
-                conversionProgressBar.progress = 100
-                openButton.post {
-                    openButton.setOnClickListener { openButtonOnClickListener(fileName) }
-                    downloadButton.setOnClickListener { downloadButtonOnClickListener(fileName) }
-                    shareButton.setOnClickListener { shareButtonOnClickListener(fileName) }
-                    convertButton.isEnabled = true
-                    openButton.isEnabled = true
-                    downloadButton.isEnabled = true
-                    shareButton.isEnabled = true
-                    videoView.setVideoURI(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
-                    progressBar.visibility = View.VISIBLE
+    private fun afterPostObservable(fragmentRequest: FragmentRequest) =
+        viewModel.requestFragment(fragmentRequest.id!!)
+            .doOnNext { conversionStatus ->
+                if (conversionStatus.eventType == "log") {
+                    if (conversionStatus.logLine!!.contains("frame=")) {
+                        conversionProgressBar.progress = viewModel.percent.toInt()
+                    }
+                    textView.post { textView.text = viewModel.message }
+                    scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+                } else if (conversionStatus.eventType == "complete") {
+                    conversionProgressBar.progress = 100
+                    openButton.post {
+                        openButton.setOnClickListener { openButtonOnClickListener(viewModel.fileName) }
+                        downloadButton.setOnClickListener { downloadButtonOnClickListener(viewModel.fileName) }
+                        shareButton.setOnClickListener { shareButtonOnClickListener(viewModel.fileName) }
+                        convertButton.isEnabled = true
+                        openButton.isEnabled = true
+                        downloadButton.isEnabled = true
+                        shareButton.isEnabled = true
+                        videoView.setVideoURI(("${Fragmentator4000.fragmentsUrl}/${viewModel.fileName}").toUri())
+                        progressBar.visibility = View.VISIBLE
+                    }
                 }
             }
-            if (messageEvent.event.equals("error")) {
-                eventSource.close()
-                textView.post { textView.text = resources.getString(R.string.error, messageEvent.data) }
+            .doOnSubscribe {
+                viewModel.message = ""
+                textView.post { textView.text = viewModel.message }
             }
-        }
-    }
-
-    private fun postFragmentRequest(
-        jsonObject: JSONObject
-    ) = JsonObjectRequest(
-        Request.Method.POST, "${Fragmentator4000.apiUrl}/fragmentRequest", jsonObject,
-        Response.Listener { response ->
-            val gson = Gson()
-            val json =
-                gson.fromJson(response.toString(), FragmentRequest::class.java)
-            fragmentRequest = json
-            eventSource = createEventSource()
-            eventSource.connect()
-        },
-        Response.ErrorListener { error ->
-            progressBar.visibility = View.INVISIBLE
-            Toast.makeText(applicationContext, "error " + error.message, Toast.LENGTH_SHORT).show()
-        }
-    )
 }
