@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.entities.Movie
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 
 class SelectedMovieActivity : AppCompatActivity() {
@@ -23,6 +25,7 @@ class SelectedMovieActivity : AppCompatActivity() {
     private lateinit var selectButton: Button
     private lateinit var filterSearchView: SearchView
     private lateinit var viewModel: SelectedMovieViewModel
+    private val compositeDisposable = CompositeDisposable()
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +42,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = viewModel.selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        viewModel.getLines(viewModel.selectedMovie.id!!)
+        compositeDisposable += viewModel.getLines(viewModel.selectedMovie.id!!)
             .subscribeBy(
                 onNext = { onResponseListener() },
                 onError = { Toast.makeText(applicationContext, "error " + it.localizedMessage, Toast.LENGTH_SHORT).show() }
@@ -94,5 +97,10 @@ class SelectedMovieActivity : AppCompatActivity() {
             return false
         }
 
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
     }
 }

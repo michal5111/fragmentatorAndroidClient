@@ -17,6 +17,7 @@ import com.example.springfragmenterclient.adapters.LineEditViewAdapter
 import com.example.springfragmenterclient.entities.Line
 import com.example.springfragmenterclient.entities.Movie
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 
 class SelectedLineActivity : AppCompatActivity() {
@@ -51,7 +52,8 @@ class SelectedLineActivity : AppCompatActivity() {
         }
         movieTitleTextView.text = viewModel.selectedMovie.fileName
         movieTimeTextView.text = viewModel.selectedLine.timeString
-        textView.text = HtmlCompat.fromHtml(viewModel.selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
+        textView.text =
+            HtmlCompat.fromHtml(viewModel.selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
         downloadButton = findViewById(R.id.SelectedLineDownloadButton)
         downloadButton.setOnClickListener {
             viewModel.setLineEdits(lineEditRecyclerView)
@@ -76,19 +78,18 @@ class SelectedLineActivity : AppCompatActivity() {
     @SuppressLint("CheckResult")
     override fun onStart() {
         super.onStart()
-        compositeDisposable.add(
-            viewModel.getLineSnapshot(viewModel.selectedLine.id!!)
-                .doOnSubscribe { progressBar.visibility = View.VISIBLE }
-                .doFinally { progressBar.visibility = View.INVISIBLE }
-                .subscribeBy(
-                    onSuccess = {
-                        imageView.load(it)
-                    },
-                    onError = {
-                        Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG).show()
-                    }
-                )
-        )
+        compositeDisposable += viewModel.getLineSnapshot(viewModel.selectedLine.id!!)
+            .doOnSubscribe { progressBar.visibility = View.VISIBLE }
+            .doFinally { progressBar.visibility = View.INVISIBLE }
+            .subscribeBy(
+                onSuccess = {
+                    imageView.load(it)
+                },
+                onError = {
+                    Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
+                        .show()
+                }
+            )
     }
 
     override fun onDestroy() {

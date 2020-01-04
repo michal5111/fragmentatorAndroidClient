@@ -25,6 +25,7 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.entities.FragmentRequest
 import com.example.springfragmenterclient.entities.Movie
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import java.io.File
 
@@ -81,21 +82,19 @@ class FragmentRequestActivity : AppCompatActivity() {
         startOffsetEditText.addTextChangedListener(startOffsetTextWatcher)
         stopOffsetEditText.addTextChangedListener(stopOffsetTextWatcher)
         convertButton.setOnClickListener {
-            compositeDisposable.add(
-                viewModel.saveFragmentRequest(viewModel.fragmentRequest).toObservable().
-                    flatMap { afterPostObservable(it) }
-                    .doOnSubscribe {
-                        conversionProgressBar.progress = 0
-                        convertButton.isEnabled = false
+            compositeDisposable += viewModel.saveFragmentRequest(viewModel.fragmentRequest)
+                .toObservable().flatMap { afterPostObservable(it) }
+                .doOnSubscribe {
+                    conversionProgressBar.progress = 0
+                    convertButton.isEnabled = false
+                }
+                .subscribeBy(
+                    onError = {
+                        Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
+                            .show()
+                        textView.post { textView.text = it.stackTrace.contentToString() }
                     }
-                    .subscribeBy(
-                        onError = {
-                            Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
-                                .show()
-                            textView.post { textView.text = it.stackTrace.contentToString() }
-                        }
-                    )
-            )
+                )
 
         }
         downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
