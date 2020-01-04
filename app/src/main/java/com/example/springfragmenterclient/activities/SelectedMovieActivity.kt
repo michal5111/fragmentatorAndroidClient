@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.entities.Movie
@@ -45,7 +45,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         compositeDisposable += viewModel.getLines(viewModel.selectedMovie.id!!)
             .subscribeBy(
                 onNext = { onResponseListener() },
-                onError = { Toast.makeText(applicationContext, "error " + it.localizedMessage, Toast.LENGTH_SHORT).show() }
+                onError = (application as Fragmentator4000)::errorHandler
             )
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {

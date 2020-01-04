@@ -4,8 +4,10 @@ import android.app.Activity
 import android.app.Application
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.example.springfragmenterclient.entities.Line
-import com.google.gson.reflect.TypeToken
+import android.widget.Toast
+import com.example.springfragmenterclient.rest.RetrofitClient
+import com.example.springfragmenterclient.rest.responses.ErrorResponse
+import retrofit2.HttpException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -16,7 +18,6 @@ class Fragmentator4000 : Application() {
         private const val serverUrl = "http://michal5111.ddns.net:8080/fragmentatorServer"
         const val apiUrl = "$serverUrl/api"
         const val fragmentsUrl = "$serverUrl/fragments"
-        val linesListType = object : TypeToken<List<Line>>() {}.type!!
 
         fun timeToSeconds(time: String): Double {
             val split = time.split(":")
@@ -39,5 +40,24 @@ class Fragmentator4000 : Application() {
         fun encodeValue(value: String): String {
             return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
         }
+
+    }
+
+    fun errorHandler(throwable: Throwable) {
+        if (throwable is HttpException) {
+            val errorJson = throwable.response()?.errorBody()?.string()
+            if (errorJson != null) {
+                if (errorJson.isNotBlank()) {
+                    val errorResponse =
+                        RetrofitClient.gson.fromJson(errorJson, ErrorResponse::class.java)
+                    Toast.makeText(this, "error ${errorResponse.status}\n${errorResponse.message}", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "error ${throwable.localizedMessage}", Toast.LENGTH_LONG)
+                .show()
+        }
+
     }
 }

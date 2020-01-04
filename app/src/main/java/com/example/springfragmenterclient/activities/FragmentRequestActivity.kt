@@ -90,9 +90,9 @@ class FragmentRequestActivity : AppCompatActivity() {
                 }
                 .subscribeBy(
                     onError = {
-                        Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
-                            .show()
-                        textView.post { textView.text = it.stackTrace.contentToString() }
+                        textView.post {
+                            (application as Fragmentator4000).errorHandler(it)
+                        }
                     }
                 )
 

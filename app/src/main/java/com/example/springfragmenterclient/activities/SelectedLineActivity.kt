@@ -5,13 +5,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Html
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
+import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.LineEditViewAdapter
 import com.example.springfragmenterclient.entities.Line
@@ -85,10 +89,7 @@ class SelectedLineActivity : AppCompatActivity() {
                 onSuccess = {
                     imageView.load(it)
                 },
-                onError = {
-                    Toast.makeText(applicationContext, "error " + it.message, Toast.LENGTH_LONG)
-                        .show()
-                }
+                onError = (application as Fragmentator4000)::errorHandler
             )
     }
 
