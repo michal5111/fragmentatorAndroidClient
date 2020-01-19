@@ -7,9 +7,10 @@ import androidx.lifecycle.LiveData
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
+import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.dataSources.LineDataSource
 import com.example.springfragmenterclient.dataSources.LineDataSourceFactory
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.repositories.SearchPhraseRepository
 
 class SearchPhraseViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,6 +19,11 @@ class SearchPhraseViewModel(application: Application) : AndroidViewModel(applica
     private lateinit var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>>
 
     private val searchPhraseRepository = SearchPhraseRepository()
+
+    private val onError: (Throwable) -> Unit = (application as Fragmentator4000)::errorHandler
+
+    var title: String? = null
+    var phrase: String = ""
 
     fun getHints(phrase: String) =
         searchPhraseRepository.getHints(phrase)
@@ -33,8 +39,8 @@ class SearchPhraseViewModel(application: Application) : AndroidViewModel(applica
                 return@map cursor
             }
 
-    fun createLiveData(phrase: String) {
-        val lineDataSourceFactory = LineDataSourceFactory(phrase)
+    fun createLiveData(phrase: String, title: String?) {
+        val lineDataSourceFactory = LineDataSourceFactory(phrase, title, onError)
         liveDataSource = lineDataSourceFactory.lineLiveData
 
         val config: PagedList.Config = PagedList.Config.Builder()

@@ -18,8 +18,9 @@ import coil.api.load
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.LineEditViewAdapter
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.model.Movie
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
@@ -82,12 +83,17 @@ class SelectedLineActivity : AppCompatActivity() {
     @SuppressLint("CheckResult")
     override fun onStart() {
         super.onStart()
-        compositeDisposable += viewModel.getLineSnapshot(viewModel.selectedLine.id!!)
+
+        compositeDisposable += Single.fromCallable {
+            imageView.load("${Fragmentator4000.apiUrl}/lineSnapshot?lineId=${viewModel.selectedLine.id}")
+        }
             .doOnSubscribe { progressBar.visibility = View.VISIBLE }
-            .doFinally { progressBar.visibility = View.INVISIBLE }
+            .doOnError {
+                imageView.load(R.drawable.ic_error_black_24dp)
+            }
             .subscribeBy(
                 onSuccess = {
-                    imageView.load(it)
+                    progressBar.visibility = View.INVISIBLE
                 },
                 onError = (application as Fragmentator4000)::errorHandler
             )

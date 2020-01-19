@@ -1,6 +1,6 @@
 package com.example.springfragmenterclient.repositories
 
-import com.example.springfragmenterclient.entities.FragmentRequest
+import com.example.springfragmenterclient.model.FragmentRequest
 import com.example.springfragmenterclient.rest.ApiService
 import com.example.springfragmenterclient.rest.RetrofitClient
 import com.example.springfragmenterclient.rest.responses.ConversionStatus

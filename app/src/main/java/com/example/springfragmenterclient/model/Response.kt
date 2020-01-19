@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient.entities
+package com.example.springfragmenterclient.model
 
 import java.io.Serializable
 

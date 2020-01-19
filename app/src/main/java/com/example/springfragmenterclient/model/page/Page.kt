@@ -1,4 +1,4 @@
-package com.example.springfragmenterclient.entities.page
+package com.example.springfragmenterclient.model.page
 
 data class Page<T>(
     val content: List<T>,

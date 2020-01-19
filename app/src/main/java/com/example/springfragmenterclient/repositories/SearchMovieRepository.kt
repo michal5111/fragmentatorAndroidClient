@@ -1,7 +1,7 @@
 package com.example.springfragmenterclient.repositories
 
 import android.database.MatrixCursor
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.rest.ApiService
 import com.example.springfragmenterclient.rest.RetrofitClient
 import io.reactivex.Flowable

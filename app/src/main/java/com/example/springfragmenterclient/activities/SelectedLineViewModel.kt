@@ -3,10 +3,10 @@ package com.example.springfragmenterclient.activities
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.adapters.LineEditViewAdapter
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.LineEdit
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.FragmentRequest
+import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.model.LineEdit
+import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.repositories.LineRepository
 
 class SelectedLineViewModel: ViewModel() {

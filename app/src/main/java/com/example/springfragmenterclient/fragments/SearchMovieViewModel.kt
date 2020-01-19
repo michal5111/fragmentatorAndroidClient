@@ -2,7 +2,7 @@ package com.example.springfragmenterclient.fragments
 
 import android.database.MatrixCursor
 import androidx.lifecycle.ViewModel
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.repositories.SearchMovieRepository
 import io.reactivex.Flowable
 

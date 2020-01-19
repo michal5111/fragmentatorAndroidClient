@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 
 class LineEditViewAdapter(private val dataSet: List<Line>) :
     RecyclerView.Adapter<LineEditViewAdapter.ViewHolder>() {

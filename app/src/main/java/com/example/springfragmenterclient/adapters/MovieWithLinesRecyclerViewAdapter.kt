@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Movie
 
 class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
     RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>(), Filterable {

@@ -1,10 +1,10 @@
 package com.example.springfragmenterclient.rest
 
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
-import com.example.springfragmenterclient.entities.Response
-import com.example.springfragmenterclient.entities.page.Page
+import com.example.springfragmenterclient.model.FragmentRequest
+import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.model.Movie
+import com.example.springfragmenterclient.model.Response
+import com.example.springfragmenterclient.model.page.Page
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -21,7 +21,11 @@ interface ApiService {
     fun postFragmentRequest(@Body fragmentRequest: FragmentRequest): Single<FragmentRequest>
 
     @GET("searchPhrase")
-    fun searchPhrase(@Query("phrase") phrase: String, @Query("page") page: Number, @Query("size") size: Number): Flowable<Page<Line>>
+    fun searchPhrase(@Query("phrase") phrase: String,
+                     @Query("page") page: Number,
+                     @Query("size") size: Number,
+                     @Query("title") title: String?
+    ): Flowable<Page<Line>>
 
     @GET("searchMovie")
     fun searchMovie(@Query("title") title: String): Flowable<List<Movie>>
@@ -35,6 +39,6 @@ interface ApiService {
     @GET("lineSnapshot")
     fun getLineSnapshot(@Query("lineId") id: Long): Single<Response>
 
-    @GET("getLines")
+    @GET("lines")
     fun getLines(@Query("movieId") id: Long): Flowable<List<Line>>
 }

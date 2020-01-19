@@ -50,7 +50,11 @@ class Fragmentator4000 : Application() {
                 if (errorJson.isNotBlank()) {
                     val errorResponse =
                         RetrofitClient.gson.fromJson(errorJson, ErrorResponse::class.java)
-                    Toast.makeText(this, "error ${errorResponse.status}\n${errorResponse.message}", Toast.LENGTH_LONG)
+                    Toast.makeText(this, getString(
+                        R.string.httpError,
+                        errorResponse.status,
+                        errorResponse.message
+                    ), Toast.LENGTH_LONG)
                         .show()
                 }
             }

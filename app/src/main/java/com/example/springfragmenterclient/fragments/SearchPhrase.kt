@@ -20,7 +20,7 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 
@@ -51,6 +51,7 @@ class SearchPhrase : Fragment() {
         recyclerView.layoutManager = viewManager
         recyclerView.setHasFixedSize(true)
         searchView.setOnQueryTextListener(onSearchQueryTextListener)
+        filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
         return root
     }
 
@@ -74,6 +75,7 @@ class SearchPhrase : Fragment() {
     private val onSearchQueryTextListener = object : SearchView.OnQueryTextListener {
         @SuppressLint("CheckResult")
         override fun onQueryTextChange(p0: String?): Boolean {
+            compositeDisposable.clear()
             compositeDisposable.add(
                 viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
                     .subscribeBy(
@@ -87,7 +89,8 @@ class SearchPhrase : Fragment() {
         override fun onQueryTextSubmit(p0: String?): Boolean {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
-            viewModel.createLiveData(p0.toString())
+            viewModel.phrase = p0.toString()
+            viewModel.createLiveData(viewModel.phrase, viewModel.title)
             setObserver()
             searchView.clearFocus()
             filterSearchView.visibility = View.VISIBLE
@@ -113,15 +116,17 @@ class SearchPhrase : Fragment() {
         super.onDestroy()
     }
 
-    //    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
-//        override fun onQueryTextSubmit(p0: String?): Boolean {
-//            return false
-//        }
-//
-//        override fun onQueryTextChange(p0: String?): Boolean {
-//            (recyclerView.adapter as LineWithMovieTitleRecyclerViewAdapter).filter.filter(p0)
-//            return false
-//        }
-//
-//    }
+    private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(p0: String?): Boolean {
+            return false
+        }
+
+        override fun onQueryTextChange(p0: String?): Boolean {
+            viewModel.title = p0.toString()
+            viewModel.createLiveData(viewModel.phrase, viewModel.title)
+            setObserver()
+            return false
+        }
+
+    }
 }

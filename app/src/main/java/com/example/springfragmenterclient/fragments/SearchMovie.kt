@@ -18,7 +18,7 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.MovieRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.MovieSuggestionsCursorAdapter
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Movie
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 

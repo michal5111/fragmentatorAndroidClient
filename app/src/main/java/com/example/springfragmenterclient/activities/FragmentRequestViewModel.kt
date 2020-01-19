@@ -2,7 +2,7 @@ package com.example.springfragmenterclient.activities
 
 import androidx.lifecycle.ViewModel
 import com.example.springfragmenterclient.Fragmentator4000
-import com.example.springfragmenterclient.entities.FragmentRequest
+import com.example.springfragmenterclient.model.FragmentRequest
 import com.example.springfragmenterclient.repositories.FragmentRequestRepository
 import com.example.springfragmenterclient.rest.responses.ConversionStatus
 import io.reactivex.Observable

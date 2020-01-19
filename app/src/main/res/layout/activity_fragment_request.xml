@@ -33,7 +33,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/log_scroll_view"
-            app:layout_constraintBottom_toTopOf="@id/conversion_progress_bar"/>
+            app:layout_constraintBottom_toTopOf="@id/playButton"/>
+
+    <ImageButton
+            android:id="@+id/playButton"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:enabled="false"
+            android:src="@drawable/ic_play_arrow_black_24dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/conversion_progress_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/video_view" />
 
     <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
@@ -45,7 +58,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/video_view"
+            app:layout_constraintTop_toBottomOf="@id/playButton"
             app:layout_constraintBottom_toTopOf="@+id/startOffsetEditText"/>
 
     <EditText

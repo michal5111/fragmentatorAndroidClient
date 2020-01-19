@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 

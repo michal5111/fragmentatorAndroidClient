@@ -2,9 +2,9 @@ package com.example.springfragmenterclient.activities
 
 import androidx.lifecycle.ViewModel
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.FragmentRequest
+import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.repositories.MovieRepository
 import io.reactivex.Flowable
 

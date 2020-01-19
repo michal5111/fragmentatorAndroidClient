@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 
 class LineWithMovieTitleRecyclerViewAdapter :
     PagedListAdapter<Line, LineWithMovieTitleRecyclerViewAdapter.ViewHolder>(object :

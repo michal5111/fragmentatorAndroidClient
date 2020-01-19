@@ -22,8 +22,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProviders
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
-import com.example.springfragmenterclient.entities.FragmentRequest
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.FragmentRequest
+import com.example.springfragmenterclient.model.Movie
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
@@ -47,6 +47,7 @@ class FragmentRequestActivity : AppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var progressBar: ProgressBar
     private lateinit var mediaController: MediaController
+    private lateinit var playButton: ImageButton
     private val compositeDisposable = CompositeDisposable()
 
     private object RequestCodes {
@@ -70,12 +71,16 @@ class FragmentRequestActivity : AppCompatActivity() {
         startOffsetEditText = findViewById(R.id.startOffsetEditText)
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
         shareButton = findViewById(R.id.share_button)
+        playButton = findViewById(R.id.playButton)
         videoView = findViewById(R.id.video_view)
         mediaController = MediaController(this)
-        videoView.setMediaController(mediaController)
+        //videoView.setMediaController(mediaController)
         videoView.setOnPreparedListener {
             mediaController.setAnchorView(videoView)
             progressBar.visibility = View.INVISIBLE
+            playButton.visibility = View.VISIBLE
+        }
+        playButton.setOnClickListener {
             videoView.start()
         }
         progressBar = findViewById(R.id.progressBar)
@@ -83,7 +88,8 @@ class FragmentRequestActivity : AppCompatActivity() {
         stopOffsetEditText.addTextChangedListener(stopOffsetTextWatcher)
         convertButton.setOnClickListener {
             compositeDisposable += viewModel.saveFragmentRequest(viewModel.fragmentRequest)
-                .toObservable().flatMap { afterPostObservable(it) }
+                .toObservable()
+                .flatMap { afterPostObservable(it) }
                 .doOnSubscribe {
                     conversionProgressBar.progress = 0
                     convertButton.isEnabled = false
@@ -292,5 +298,6 @@ class FragmentRequestActivity : AppCompatActivity() {
             .doOnSubscribe {
                 viewModel.message = ""
                 textView.post { textView.text = viewModel.message }
+                playButton.visibility = View.INVISIBLE
             }
 }

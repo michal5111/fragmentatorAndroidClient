@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Movie
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy

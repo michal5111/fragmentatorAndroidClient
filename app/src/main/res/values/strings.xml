@@ -17,4 +17,5 @@
     <string name="error">Błąd: %1$s</string>
     <string name="filterByTitle">Filtruj po tytule</string>
     <string name="filterByFraze">Filtruj po frazie</string>
+    <string name="httpError">Błąd http %1$d\n%2$s</string>
 </resources>

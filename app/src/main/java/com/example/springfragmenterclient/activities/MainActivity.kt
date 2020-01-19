@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
-import com.example.springfragmenterclient.entities.Line
-import com.example.springfragmenterclient.entities.Movie
+import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.SectionsPagerAdapter
 import com.google.android.material.tabs.TabLayout

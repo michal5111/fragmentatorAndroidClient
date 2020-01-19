@@ -1,6 +1,6 @@
 package com.example.springfragmenterclient.repositories
 
-import com.example.springfragmenterclient.entities.Line
+import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.rest.ApiService
 import com.example.springfragmenterclient.rest.RetrofitClient
 import io.reactivex.Flowable
@@ -18,8 +18,8 @@ class SearchPhraseRepository {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun searchPhrase(phrase: String, page: Number) =
-        apiService.searchPhrase(phrase, page, PAGE_SIZE)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+//    fun searchPhrase(phrase: String, page: Number) =
+//        apiService.searchPhrase(phrase, page, PAGE_SIZE, )
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
 }
