@@ -1,6 +1,5 @@
 package com.example.springfragmenterclient.adapters
 
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,7 +45,7 @@ class LineWithMovieTitleRecyclerViewAdapter :
                 titleTextView.text = line.subtitles.movie.fileName
                 timeTextView.text = line.timeString
                 lineTextView.text =
-                    HtmlCompat.fromHtml(line.textLines, Html.FROM_HTML_MODE_LEGACY)
+                    HtmlCompat.fromHtml(line.textLines, HtmlCompat.FROM_HTML_MODE_COMPACT)
                 cardView.setOnClickListener {
                     (this.lineTextView.context as MainActivity).selectLine(
                         line.subtitles.movie,

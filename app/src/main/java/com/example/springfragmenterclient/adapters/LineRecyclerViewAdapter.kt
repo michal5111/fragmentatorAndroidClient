@@ -1,6 +1,5 @@
 package com.example.springfragmenterclient.adapters
 
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,9 +7,9 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
+import com.example.springfragmenterclient.model.Line
 
 class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Adapter<LineRecyclerViewAdapter.ViewHolder>() {
 
@@ -29,7 +28,8 @@ class LineRecyclerViewAdapter(private val dataSet: List<Line>) : RecyclerView.Ad
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.apply {
             timeTextView.text = dataSet[position].timeString
-            lineTextView.text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
+            lineTextView.text =
+                HtmlCompat.fromHtml(dataSet[position].textLines, HtmlCompat.FROM_HTML_MODE_COMPACT)
             cardView.setOnClickListener {
                 (this.lineTextView.context as MainActivity).selectLine(dataSet[position].subtitles.movie,dataSet[position])
             }

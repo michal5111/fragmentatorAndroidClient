@@ -8,14 +8,16 @@ import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.model.LineEdit
 import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.repositories.LineRepository
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
 
-class SelectedLineViewModel: ViewModel() {
-
-    private val lineRepository = LineRepository()
+class SelectedLineViewModel
+@Inject constructor(private val lineRepository: LineRepository) : ViewModel() {
 
     internal lateinit var selectedMovie: Movie
     internal lateinit var selectedLine: Line
     internal var fragmentRequest: FragmentRequest = FragmentRequest()
+    val compositeDisposable = CompositeDisposable()
 
     fun getLineSnapshot(id: Long) =
         lineRepository.getLineSnapshot(id)
@@ -36,5 +38,10 @@ class SelectedLineViewModel: ViewModel() {
                 )
             }
         }
+    }
+
+    override fun onCleared() {
+        compositeDisposable.dispose()
+        super.onCleared()
     }
 }

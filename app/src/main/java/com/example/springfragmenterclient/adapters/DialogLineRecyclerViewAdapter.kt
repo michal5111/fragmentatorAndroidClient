@@ -1,7 +1,6 @@
 package com.example.springfragmenterclient.adapters
 
 import android.graphics.Color
-import android.text.Html
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +12,8 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.R
+import com.example.springfragmenterclient.model.Line
 
 class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
     RecyclerView.Adapter<DialogLineRecyclerViewAdapter.ViewHolder>(), Filterable {
@@ -76,7 +75,10 @@ class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
                 text = dataSet[position].timeString
             }
             lineTextView.apply {
-                text = HtmlCompat.fromHtml(dataSet[position].textLines, Html.FROM_HTML_MODE_LEGACY)
+                text = HtmlCompat.fromHtml(
+                    dataSet[position].textLines,
+                    HtmlCompat.FROM_HTML_MODE_COMPACT
+                )
             }
             cardView.setOnClickListener {
                 if (selectedItems.get(position, false)) {

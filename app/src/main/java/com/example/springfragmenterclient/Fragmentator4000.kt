@@ -2,17 +2,26 @@ package com.example.springfragmenterclient
 
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import com.example.springfragmenterclient.rest.RetrofitClient
+import com.example.springfragmenterclient.component.DaggerApplicationGraph
+import com.example.springfragmenterclient.modules.AppModule
 import com.example.springfragmenterclient.rest.responses.ErrorResponse
+import com.google.gson.Gson
 import retrofit2.HttpException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 
 class Fragmentator4000 : Application() {
+
+    val appComponent = DaggerApplicationGraph.builder()
+        .appModule(AppModule(this))
+        .build()
+
+    private val gson: Gson = Gson()
 
     companion object {
         private const val serverUrl = "http://michal5111.ddns.net:8080/fragmentatorServer"
@@ -44,12 +53,13 @@ class Fragmentator4000 : Application() {
     }
 
     fun errorHandler(throwable: Throwable) {
+        Log.e("FragmenterError", throwable.message, throwable)
         if (throwable is HttpException) {
             val errorJson = throwable.response()?.errorBody()?.string()
             if (errorJson != null) {
                 if (errorJson.isNotBlank()) {
                     val errorResponse =
-                        RetrofitClient.gson.fromJson(errorJson, ErrorResponse::class.java)
+                        gson.fromJson(errorJson, ErrorResponse::class.java)
                     Toast.makeText(this, getString(
                         R.string.httpError,
                         errorResponse.status,

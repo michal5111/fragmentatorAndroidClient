@@ -2,17 +2,19 @@ package com.example.springfragmenterclient.repositories
 
 import com.example.springfragmenterclient.model.FragmentRequest
 import com.example.springfragmenterclient.rest.ApiService
-import com.example.springfragmenterclient.rest.RetrofitClient
 import com.example.springfragmenterclient.rest.responses.ConversionStatus
+import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okio.BufferedSource
+import javax.inject.Inject
 
-class FragmentRequestRepository {
-
-    private val apiService: ApiService = RetrofitClient.INSTANCE
+class FragmentRequestRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val gson: Gson
+) {
 
     fun save(fragmentRequest: FragmentRequest): Single<FragmentRequest> =
         apiService.postFragmentRequest(fragmentRequest)
@@ -23,7 +25,7 @@ class FragmentRequestRepository {
         apiService.requestFragment(id)
             .subscribeOn(Schedulers.io())
             .flatMap { responseBody -> events(responseBody.source()) }
-            .map { line -> RetrofitClient.gson.fromJson(line, ConversionStatus::class.java) }
+            .map { line -> gson.fromJson(line, ConversionStatus::class.java) }
 
     private fun events(source: BufferedSource): Observable<String> = Observable.create { subscriber ->
         while (!source.exhausted()) {

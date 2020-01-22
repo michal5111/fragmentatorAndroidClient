@@ -38,15 +38,15 @@
             android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/RecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:id="@+id/RecyclerView"
                 android:clipToPadding="true"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                tools:listitem="@layout/movie_with_lines_row_item">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:listitem="@layout/line_with_movie_title_row_item">
 
         </androidx.recyclerview.widget.RecyclerView>
 

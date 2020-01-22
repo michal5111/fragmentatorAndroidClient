@@ -1,10 +1,11 @@
 package com.example.springfragmenterclient.dataSources
 
 import android.annotation.SuppressLint
+import android.app.Application
 import androidx.paging.PageKeyedDataSource
+import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.rest.ApiService
-import com.example.springfragmenterclient.rest.RetrofitClient
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -13,18 +14,19 @@ import io.reactivex.schedulers.Schedulers
 class LineDataSource(
     private val phrase: String,
     private val title: String?,
-    private val onError: (Throwable) -> Unit
+    private val apiService: ApiService,
+    private val application: Application
 ) : PageKeyedDataSource<Long, Line>() {
 
     companion object {
         const val PAGE_SIZE = 50
         const val FIRST_PAGE = 0
-        val apiService: ApiService = RetrofitClient.INSTANCE
     }
 
-    private fun searchPhrase(phrase: String, page: Number) = apiService.searchPhrase(phrase, page, PAGE_SIZE, title)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+    private fun searchPhrase(phrase: String, page: Number) =
+        apiService.searchPhrase(phrase, page, PAGE_SIZE, title)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
 
     override fun loadInitial(
         params: LoadInitialParams<Long>,
@@ -32,21 +34,21 @@ class LineDataSource(
     ) {
         searchPhrase(phrase, FIRST_PAGE)
             .subscribeBy(
-                onNext = {callback.onResult(it.content, null, FIRST_PAGE + 1L)},
-                onError = onError
+                onNext = { callback.onResult(it.content, null, FIRST_PAGE + 1L) },
+                onError = (application as Fragmentator4000)::errorHandler
             )
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Long, Line>) {
         searchPhrase(phrase, params.key)
             .subscribeBy(
-                onNext =  {
+                onNext = {
                     val key = if (it.last) null else params.key + 1
                     if (key != null) {
                         callback.onResult(it.content, key)
                     }
                 },
-                onError = onError
+                onError = (application as Fragmentator4000)::errorHandler
             )
     }
 
@@ -59,7 +61,7 @@ class LineDataSource(
                         callback.onResult(it.content, key)
                     }
                 },
-                onError = onError
+                onError = (application as Fragmentator4000)::errorHandler
             )
     }
 }

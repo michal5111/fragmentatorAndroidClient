@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,9 +15,9 @@ import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.model.Movie
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
+import javax.inject.Inject
 
 class SelectedMovieActivity : AppCompatActivity() {
 
@@ -24,14 +25,17 @@ class SelectedMovieActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var selectButton: Button
     private lateinit var filterSearchView: SearchView
-    private lateinit var viewModel: SelectedMovieViewModel
-    private val compositeDisposable = CompositeDisposable()
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModel: SelectedMovieViewModel
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_movie)
-        viewModel = ViewModelProviders.of(this)[SelectedMovieViewModel::class.java]
+        (application as Fragmentator4000).appComponent.inject(this)
+        viewModel =
+            ViewModelProviders.of(this, viewModelFactory)[SelectedMovieViewModel::class.java]
         viewModel.selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         recyclerView = findViewById(R.id.RecyclerView)
         selectButton = findViewById(R.id.button)
@@ -42,7 +46,7 @@ class SelectedMovieActivity : AppCompatActivity() {
         val movieTitleTextView: TextView = findViewById(R.id.movieTitle)
         movieTitleTextView.text = viewModel.selectedMovie.fileName
         recyclerView.layoutManager = viewManager
-        compositeDisposable += viewModel.getLines(viewModel.selectedMovie.id!!)
+        viewModel.compositeDisposable += viewModel.getLines(viewModel.selectedMovie.id!!)
             .subscribeBy(
                 onNext = { onResponseListener() },
                 onError = (application as Fragmentator4000)::errorHandler
@@ -63,7 +67,7 @@ class SelectedMovieActivity : AppCompatActivity() {
             filterSearchView.setQuery("", false)
             //recyclerView.scrollTo()
         }
-        if (adapter.selectedItems.size() >= 2) {
+        if (adapter.selectedItems.size() >= 1) {
             selectButton.isEnabled = true
             viewModel.onLinesSelected(adapter)
         } else {
@@ -81,7 +85,7 @@ class SelectedMovieActivity : AppCompatActivity() {
                 scrollToPosition(position)
                 (adapter as DialogLineRecyclerViewAdapter).apply {
                     selectedItems.put(position, true)
-                    notifyDataSetChanged()
+                    notifyItemChanged(position)
                 }
             }
         }
@@ -97,10 +101,5 @@ class SelectedMovieActivity : AppCompatActivity() {
             return false
         }
 
-    }
-
-    override fun onDestroy() {
-        compositeDisposable.clear()
-        super.onDestroy()
     }
 }

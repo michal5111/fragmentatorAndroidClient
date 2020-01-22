@@ -1,26 +1,26 @@
 package com.example.springfragmenterclient.fragments
 
-import android.app.Application
 import android.database.MatrixCursor
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
-import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.dataSources.LineDataSource
 import com.example.springfragmenterclient.dataSources.LineDataSourceFactory
 import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.repositories.SearchPhraseRepository
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
 
-class SearchPhraseViewModel(application: Application) : AndroidViewModel(application) {
+class SearchPhraseViewModel @Inject constructor(
+    private val searchPhraseRepository: SearchPhraseRepository,
+    val lineDataSourceFactory: LineDataSourceFactory
+) : ViewModel() {
 
     lateinit var linePagedList: LiveData<PagedList<Line>>
     private lateinit var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>>
-
-    private val searchPhraseRepository = SearchPhraseRepository()
-
-    private val onError: (Throwable) -> Unit = (application as Fragmentator4000)::errorHandler
+    val compositeDisposable = CompositeDisposable()
 
     var title: String? = null
     var phrase: String = ""
@@ -40,7 +40,10 @@ class SearchPhraseViewModel(application: Application) : AndroidViewModel(applica
             }
 
     fun createLiveData(phrase: String, title: String?) {
-        val lineDataSourceFactory = LineDataSourceFactory(phrase, title, onError)
+        lineDataSourceFactory.apply {
+            this.title = title
+            this.phrase = phrase
+        }
         liveDataSource = lineDataSourceFactory.lineLiveData
 
         val config: PagedList.Config = PagedList.Config.Builder()
@@ -49,5 +52,10 @@ class SearchPhraseViewModel(application: Application) : AndroidViewModel(applica
             .build()
 
         linePagedList = LivePagedListBuilder(lineDataSourceFactory, config).build()
+    }
+
+    override fun onCleared() {
+        compositeDisposable.dispose()
+        super.onCleared()
     }
 }

@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +19,9 @@ import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.MovieRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.MovieSuggestionsCursorAdapter
 import com.example.springfragmenterclient.model.Movie
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
+import javax.inject.Inject
 
 class SearchMovie : Fragment() {
 
@@ -28,12 +29,12 @@ class SearchMovie : Fragment() {
         fun newInstance() = SearchMovie()
     }
 
-    private lateinit var viewModel: SearchMovieViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModel: SearchMovieViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
-    private val compositeDisposable = CompositeDisposable()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,44 +52,40 @@ class SearchMovie : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SearchMovieViewModel::class.java)
+        (activity!!.application as Fragmentator4000).appComponent.inject(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory)[SearchMovieViewModel::class.java]
     }
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         @SuppressLint("CheckResult")
         override fun onQueryTextSubmit(p0: String?): Boolean {
             Fragmentator4000.hideKeyboard(activity as MainActivity)
-            compositeDisposable.add(
+            viewModel.compositeDisposable +=
                 viewModel.getMovies(Fragmentator4000.encodeValue(p0.toString()))
-                    .doOnSubscribe{progressBar.visibility = View.VISIBLE}
+                    .doOnSubscribe { progressBar.visibility = View.VISIBLE }
                     .doFinally { progressBar.visibility = View.INVISIBLE }
                     .subscribeBy(
-                        onNext = {showMovies(it)},
-                        onError = {showError(it)}
+                        onNext = this@SearchMovie::showMovies,
+                        onError = (activity!!.application as Fragmentator4000)::errorHandler
                     )
-            )
+
             return true
         }
 
         @SuppressLint("CheckResult")
         override fun onQueryTextChange(p0: String?): Boolean {
-            compositeDisposable.add(
+            viewModel.compositeDisposable +=
                 viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
                     .subscribeBy(
-                        onNext = {createAdapter(it)},
-                        onError = {showError(it)}
+                        onNext = { createAdapter(it) },
+                        onError = (activity!!.application as Fragmentator4000)::errorHandler
                     )
-            )
             return false
         }
     }
 
     fun showMovies(movies: List<Movie>) {
         recyclerView.adapter = MovieRecyclerViewAdapter(movies)
-    }
-
-    fun showError(error: Throwable) {
-        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
     }
 
     fun createAdapter(cursor: MatrixCursor) {
@@ -98,10 +95,5 @@ class SearchMovie : Fragment() {
             true,
             searchView
         )
-    }
-
-    override fun onDestroy() {
-        compositeDisposable.clear()
-        super.onDestroy()
     }
 }

@@ -2,7 +2,6 @@ package com.example.springfragmenterclient.adapters
 
 import android.content.Context
 import android.database.Cursor
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +25,7 @@ class LineSuggestionsCursorAdapter(
 
     override fun bindView(view: View, context: Context, cursor: Cursor) {
         val htmlLine: String = cursor.getString(cursor.getColumnIndexOrThrow("hint"))
-        val line = HtmlCompat.fromHtml(htmlLine, Html.FROM_HTML_MODE_LEGACY)
+        val line = HtmlCompat.fromHtml(htmlLine, HtmlCompat.FROM_HTML_MODE_COMPACT)
         val textView: TextView = view.findViewById(R.id.TitleTextView)
         textView.apply {
             text = line

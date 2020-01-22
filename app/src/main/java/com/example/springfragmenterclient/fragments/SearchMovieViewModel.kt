@@ -5,10 +5,13 @@ import androidx.lifecycle.ViewModel
 import com.example.springfragmenterclient.model.Movie
 import com.example.springfragmenterclient.repositories.SearchMovieRepository
 import io.reactivex.Flowable
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
 
-class SearchMovieViewModel : ViewModel() {
+class SearchMovieViewModel @Inject constructor(private val searchMovieRepository: SearchMovieRepository) :
+    ViewModel() {
 
-    private val searchMovieRepository = SearchMovieRepository()
+    val compositeDisposable = CompositeDisposable()
 
     fun getMovies(title: String): Flowable<List<Movie>> {
         return searchMovieRepository.getMoviesByTitle(title)
@@ -16,5 +19,10 @@ class SearchMovieViewModel : ViewModel() {
 
     fun getHints(text: String): Flowable<MatrixCursor> {
         return searchMovieRepository.getHints(text)
+    }
+
+    override fun onCleared() {
+        compositeDisposable.dispose()
+        super.onCleared()
     }
 }

@@ -8,9 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,8 +21,9 @@ import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
 import com.example.springfragmenterclient.model.Line
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
+import javax.inject.Inject
 
 class SearchPhrase : Fragment() {
 
@@ -30,13 +31,14 @@ class SearchPhrase : Fragment() {
         fun newInstance() = SearchPhrase()
     }
 
-    private lateinit var viewModel: SearchPhraseViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModel: SearchPhraseViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
     private lateinit var filterSearchView: SearchView
     private lateinit var lineAdapter: LineWithMovieTitleRecyclerViewAdapter
-    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,7 +59,8 @@ class SearchPhrase : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SearchPhraseViewModel::class.java)
+        (activity!!.application as Fragmentator4000).appComponent.inject(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory)[SearchPhraseViewModel::class.java]
         lineAdapter = LineWithMovieTitleRecyclerViewAdapter()
         recyclerView.adapter = lineAdapter
     }
@@ -75,14 +78,13 @@ class SearchPhrase : Fragment() {
     private val onSearchQueryTextListener = object : SearchView.OnQueryTextListener {
         @SuppressLint("CheckResult")
         override fun onQueryTextChange(p0: String?): Boolean {
-            compositeDisposable.clear()
-            compositeDisposable.add(
+            viewModel.compositeDisposable.dispose()
+            viewModel.compositeDisposable +=
                 viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
                     .subscribeBy(
-                        onNext = {createAdapter(it)},
-                        onError = {showError(it)}
+                        onNext = this@SearchPhrase::createAdapter,
+                        onError = (activity!!.application as Fragmentator4000)::errorHandler
                     )
-            )
             return false
         }
 
@@ -107,14 +109,6 @@ class SearchPhrase : Fragment() {
         )
     }
 
-    private fun showError(error: Throwable) {
-        Toast.makeText(context, "error " + error.localizedMessage, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onDestroy() {
-        compositeDisposable.clear()
-        super.onDestroy()
-    }
 
     private val onFilterQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(p0: String?): Boolean {

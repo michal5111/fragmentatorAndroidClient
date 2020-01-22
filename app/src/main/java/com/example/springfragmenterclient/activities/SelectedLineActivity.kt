@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,9 +22,9 @@ import com.example.springfragmenterclient.adapters.LineEditViewAdapter
 import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.model.Movie
 import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
+import javax.inject.Inject
 
 class SelectedLineActivity : AppCompatActivity() {
 
@@ -34,26 +35,30 @@ class SelectedLineActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var downloadButton: Button
     private lateinit var lineEditRecyclerView: RecyclerView
-    private lateinit var viewModel: SelectedLineViewModel
-    private val compositeDisposable = CompositeDisposable()
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModel: SelectedLineViewModel
 
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (application as Fragmentator4000).appComponent.inject(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory)[SelectedLineViewModel::class.java]
         setContentView(R.layout.activity_selected_line)
-        viewModel = ViewModelProviders.of(this)[SelectedLineViewModel::class.java]
         imageView = findViewById(R.id.SelectedLineImageView)
         movieTimeTextView = findViewById(R.id.SelectedLineTimeTextView)
         movieTitleTextView = findViewById(R.id.SelectedLineTitleTextView)
         textView = findViewById(R.id.SelectedLineTextView)
         progressBar = findViewById(R.id.SelectedLineProgressBar)
         lineEditRecyclerView = findViewById(R.id.LineEditRecyclerView)
-        viewModel.selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-        viewModel.selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
-        viewModel.fragmentRequest.apply {
-            movieId = viewModel.selectedMovie.id
-            startLineId = viewModel.selectedLine.id
-            stopLineId = viewModel.selectedLine.id
+        viewModel.apply {
+            selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
+            selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
+            fragmentRequest.apply {
+                movieId = viewModel.selectedMovie.id
+                startLineId = viewModel.selectedLine.id
+                stopLineId = viewModel.selectedLine.id
+            }
         }
         movieTitleTextView.text = viewModel.selectedMovie.fileName
         movieTimeTextView.text = viewModel.selectedLine.timeString
@@ -84,7 +89,7 @@ class SelectedLineActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        compositeDisposable += Single.fromCallable {
+        viewModel.compositeDisposable += Single.fromCallable {
             imageView.load("${Fragmentator4000.apiUrl}/lineSnapshot?lineId=${viewModel.selectedLine.id}")
         }
             .doOnSubscribe { progressBar.visibility = View.VISIBLE }
@@ -97,10 +102,5 @@ class SelectedLineActivity : AppCompatActivity() {
                 },
                 onError = (application as Fragmentator4000)::errorHandler
             )
-    }
-
-    override fun onDestroy() {
-        compositeDisposable.clear()
-        super.onDestroy()
     }
 }

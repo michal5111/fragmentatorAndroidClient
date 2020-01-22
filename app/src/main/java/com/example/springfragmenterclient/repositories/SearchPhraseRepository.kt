@@ -2,14 +2,12 @@ package com.example.springfragmenterclient.repositories
 
 import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.rest.ApiService
-import com.example.springfragmenterclient.rest.RetrofitClient
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class SearchPhraseRepository {
-
-    private val apiService: ApiService = RetrofitClient.INSTANCE
+class SearchPhraseRepository @Inject constructor(private val apiService: ApiService) {
 
     private val PAGE_SIZE = 20
 
