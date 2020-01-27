@@ -8,7 +8,6 @@ import javax.inject.Singleton
 @Module
 class AppModule constructor(val application: Application) {
 
-
     @Provides
     @Singleton
     fun providesApplication(): Application {

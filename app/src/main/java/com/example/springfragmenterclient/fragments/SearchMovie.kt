@@ -8,9 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.SearchView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
@@ -19,11 +17,12 @@ import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.MovieRecyclerViewAdapter
 import com.example.springfragmenterclient.adapters.MovieSuggestionsCursorAdapter
 import com.example.springfragmenterclient.model.Movie
+import dagger.android.support.DaggerFragment
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
-class SearchMovie : Fragment() {
+class SearchMovie : DaggerFragment() {
 
     companion object {
         fun newInstance() = SearchMovie()
@@ -52,8 +51,7 @@ class SearchMovie : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        (activity!!.application as Fragmentator4000).appComponent.inject(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory)[SearchMovieViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[SearchMovieViewModel::class.java]
     }
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {

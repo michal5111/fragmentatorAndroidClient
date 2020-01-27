@@ -8,10 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.SearchView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,11 +19,12 @@ import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
 import com.example.springfragmenterclient.model.Line
+import dagger.android.support.DaggerFragment
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
-class SearchPhrase : Fragment() {
+class SearchPhrase : DaggerFragment() {
 
     companion object {
         fun newInstance() = SearchPhrase()
@@ -59,8 +58,7 @@ class SearchPhrase : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        (activity!!.application as Fragmentator4000).appComponent.inject(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory)[SearchPhraseViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[SearchPhraseViewModel::class.java]
         lineAdapter = LineWithMovieTitleRecyclerViewAdapter()
         recyclerView.adapter = lineAdapter
     }
@@ -68,7 +66,7 @@ class SearchPhrase : Fragment() {
     private fun setObserver() {
         viewModel.linePagedList.observe(this,
             Observer<PagedList<Line>> {
-                    t -> lineAdapter.submitList(t)
+                lineAdapter.submitList(it)
                     progressBar.visibility = View.INVISIBLE
             })
     }

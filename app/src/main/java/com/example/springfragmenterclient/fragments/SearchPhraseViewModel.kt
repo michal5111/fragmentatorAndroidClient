@@ -15,12 +15,17 @@ import javax.inject.Inject
 
 class SearchPhraseViewModel @Inject constructor(
     private val searchPhraseRepository: SearchPhraseRepository,
-    val lineDataSourceFactory: LineDataSourceFactory
+    private val lineDataSourceFactory: LineDataSourceFactory
 ) : ViewModel() {
 
     lateinit var linePagedList: LiveData<PagedList<Line>>
-    private lateinit var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>>
+    private var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>> =
+        lineDataSourceFactory.lineLiveData
     val compositeDisposable = CompositeDisposable()
+    private val config: PagedList.Config = PagedList.Config.Builder()
+        .setEnablePlaceholders(false)
+        .setPageSize(LineDataSource.PAGE_SIZE)
+        .build()
 
     var title: String? = null
     var phrase: String = ""
@@ -44,13 +49,6 @@ class SearchPhraseViewModel @Inject constructor(
             this.title = title
             this.phrase = phrase
         }
-        liveDataSource = lineDataSourceFactory.lineLiveData
-
-        val config: PagedList.Config = PagedList.Config.Builder()
-            .setEnablePlaceholders(false)
-            .setPageSize(LineDataSource.PAGE_SIZE)
-            .build()
-
         linePagedList = LivePagedListBuilder(lineDataSourceFactory, config).build()
     }
 

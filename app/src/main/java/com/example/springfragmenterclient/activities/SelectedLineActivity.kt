@@ -9,10 +9,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
@@ -21,12 +19,13 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.LineEditViewAdapter
 import com.example.springfragmenterclient.model.Line
 import com.example.springfragmenterclient.model.Movie
+import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Single
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
-class SelectedLineActivity : AppCompatActivity() {
+class SelectedLineActivity : DaggerAppCompatActivity() {
 
     private lateinit var imageView: ImageView
     private lateinit var movieTitleTextView: TextView
@@ -42,8 +41,7 @@ class SelectedLineActivity : AppCompatActivity() {
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (application as Fragmentator4000).appComponent.inject(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory)[SelectedLineViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[SelectedLineViewModel::class.java]
         setContentView(R.layout.activity_selected_line)
         imageView = findViewById(R.id.SelectedLineImageView)
         movieTimeTextView = findViewById(R.id.SelectedLineTimeTextView)

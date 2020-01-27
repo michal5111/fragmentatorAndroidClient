@@ -19,15 +19,15 @@ class FragmentRequestViewModel
 @Inject constructor(private val fragmentRequestRepository: FragmentRequestRepository) :
     ViewModel() {
 
-    lateinit var movie: Movie
     var message: String = ""
     var percent: Double = 0.0
     var to: Double = 0.0
     var lastDownload: Long = -1L
     var lastShare: Long = -1L
+    val compositeDisposable = CompositeDisposable()
+    lateinit var movie: Movie
     lateinit var fileName: String
     lateinit var fragmentRequest: FragmentRequest
-    val compositeDisposable = CompositeDisposable()
     lateinit var downloadManager: DownloadManager
 
     fun saveFragmentRequest(fragmentRequest: FragmentRequest): Single<FragmentRequest> =

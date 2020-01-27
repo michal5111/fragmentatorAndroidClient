@@ -6,20 +6,19 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.adapters.DialogLineRecyclerViewAdapter
 import com.example.springfragmenterclient.model.Movie
+import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
-class SelectedMovieActivity : AppCompatActivity() {
+class SelectedMovieActivity : DaggerAppCompatActivity() {
 
 
     private lateinit var recyclerView: RecyclerView
@@ -33,9 +32,8 @@ class SelectedMovieActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_movie)
-        (application as Fragmentator4000).appComponent.inject(this)
         viewModel =
-            ViewModelProviders.of(this, viewModelFactory)[SelectedMovieViewModel::class.java]
+            ViewModelProvider(this, viewModelFactory)[SelectedMovieViewModel::class.java]
         viewModel.selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         recyclerView = findViewById(R.id.RecyclerView)
         selectButton = findViewById(R.id.button)

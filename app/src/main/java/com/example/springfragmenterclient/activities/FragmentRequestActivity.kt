@@ -14,22 +14,21 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.model.FragmentRequest
 import com.example.springfragmenterclient.model.Movie
+import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import java.io.File
 import javax.inject.Inject
 
-class FragmentRequestActivity : AppCompatActivity() {
+class FragmentRequestActivity : DaggerAppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -55,9 +54,8 @@ class FragmentRequestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (application as Fragmentator4000).appComponent.inject(this)
         viewModel =
-            ViewModelProviders.of(this, viewModelFactory)[FragmentRequestViewModel::class.java]
+            ViewModelProvider(this, viewModelFactory)[FragmentRequestViewModel::class.java]
         setContentView(R.layout.activity_fragment_request)
         viewModel.movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
         viewModel.fragmentRequest =
@@ -151,8 +149,8 @@ class FragmentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         unregisterReceiver(onComplete)
+        super.onDestroy()
     }
 
     private fun openButtonOnClickListener(fileName: String) {
