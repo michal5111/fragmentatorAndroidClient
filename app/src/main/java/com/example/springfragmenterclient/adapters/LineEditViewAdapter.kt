@@ -31,17 +31,16 @@ class LineEditViewAdapter(private val dataSet: List<Line>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val lineEditTextWatcher = object : TextWatcher {
 
-            override fun afterTextChanged(p0: Editable?) {
-                holder.edited = p0!! != beforeChange
+            override fun afterTextChanged(ed: Editable?) {
+                ed?.let {
+                    holder.edited = ed != beforeChange
+                }
+                beforeChange = ed.toString()
             }
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                beforeChange = p0!!
-            }
+            override fun beforeTextChanged(cs: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         }
         holder.apply {
             lineTextEdit.setText(dataSet[position].textLines)

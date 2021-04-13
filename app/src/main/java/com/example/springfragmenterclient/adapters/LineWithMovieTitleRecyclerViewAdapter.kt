@@ -39,19 +39,14 @@ class LineWithMovieTitleRecyclerViewAdapter :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val line: Line? = getItem(position)
-        if (line != null) {
-            viewHolder.apply {
-                titleTextView.text = line.subtitles.movie.fileName
-                timeTextView.text = line.timeString
-                lineTextView.text =
-                    HtmlCompat.fromHtml(line.textLines, HtmlCompat.FROM_HTML_MODE_COMPACT)
-                cardView.setOnClickListener {
-                    (this.lineTextView.context as MainActivity).selectLine(
-                        line.subtitles.movie,
-                        line
-                    )
-                }
+        val line: Line = getItem(position) ?: return
+        viewHolder.apply {
+            titleTextView.text = line.subtitles.movie.parsedTitle ?: line.subtitles.movie.fileName
+            timeTextView.text = line.timeString
+            lineTextView.text =
+                HtmlCompat.fromHtml(line.textLines, HtmlCompat.FROM_HTML_MODE_COMPACT)
+            cardView.setOnClickListener {
+                (this.lineTextView.context as MainActivity).selectLine(line.subtitles.movie, line)
             }
         }
     }

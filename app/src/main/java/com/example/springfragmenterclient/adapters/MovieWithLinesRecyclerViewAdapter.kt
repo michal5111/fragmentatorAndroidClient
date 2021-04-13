@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.model.Movie
+import java.util.*
 
 class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
     RecyclerView.Adapter<MovieWithLinesRecyclerViewAdapter.ViewHolder>(), Filterable {
@@ -30,9 +31,9 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
             if (p0.isNullOrBlank()) {
                 filteredList.addAll(dataSetFull)
             } else {
-                val pattern = p0.toString().toUpperCase().replace('.', ' ').trim()
+                val pattern = p0.toString().toUpperCase(Locale.ROOT).replace('.', ' ').trim()
                 dataSetFull.forEach {
-                    if (it.fileName.toUpperCase().replace('.', ' ').contains(pattern)) {
+                    if (it.fileName.toUpperCase(Locale.ROOT).replace('.', ' ').contains(pattern)) {
                         filteredList.add(it)
                     }
                 }
@@ -42,10 +43,12 @@ class MovieWithLinesRecyclerViewAdapter(private val dataSetFull: List<Movie>) :
             return filteredResults
         }
 
-        override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
-            dataSet.clear()
-            dataSet.addAll(p1!!.values as MutableList<Movie>)
-            notifyDataSetChanged()
+        override fun publishResults(cs: CharSequence?, fr: FilterResults?) {
+            fr?.let {
+                dataSet.clear()
+                dataSet.addAll(fr.values as MutableList<Movie>)
+                notifyDataSetChanged()
+            }
         }
 
     }

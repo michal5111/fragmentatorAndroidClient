@@ -26,7 +26,7 @@ class SelectedMovieViewModel
     fun onLinesSelected(adapter: DialogLineRecyclerViewAdapter) {
         val list = lines.filter {
             adapter.selectedItems.get(lines.indexOf(it), false)
-        }.toList()
+        }
         fragmentRequest.apply {
             startLineId = list.first().id
             stopLineId = list.last().id

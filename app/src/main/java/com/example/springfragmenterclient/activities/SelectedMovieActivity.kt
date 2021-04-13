@@ -24,9 +24,11 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var selectButton: Button
     private lateinit var filterSearchView: SearchView
+    private var scrollPosition = 0
+
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    lateinit var viewModel: SelectedMovieViewModel
+    private lateinit var viewModel: SelectedMovieViewModel
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +36,8 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
         setContentView(R.layout.activity_selected_movie)
         viewModel =
             ViewModelProvider(this, viewModelFactory)[SelectedMovieViewModel::class.java]
-        viewModel.selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
+        viewModel.selectedMovie =
+            intent.getSerializableExtra("com.example.springfragmenterclient.SELECTED_MOVIE") as Movie
         recyclerView = findViewById(R.id.RecyclerView)
         selectButton = findViewById(R.id.button)
         viewModel.fragmentRequest.apply {
@@ -46,13 +49,19 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
         recyclerView.layoutManager = viewManager
         viewModel.compositeDisposable += viewModel.getLines(viewModel.selectedMovie.id!!)
             .subscribeBy(
-                onNext = { onResponseListener() },
+                onNext = { onResponse() },
                 onError = (application as Fragmentator4000)::errorHandler
             )
         selectButton.setOnClickListener {
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", viewModel.selectedMovie)
-                putExtra("FRAGMENT_REQUEST", viewModel.fragmentRequest)
+                putExtra(
+                    "com.example.springfragmenterclient.SELECTED_MOVIE",
+                    viewModel.selectedMovie
+                )
+                putExtra(
+                    "com.example.springfragmenterclient.FRAGMENT_REQUEST",
+                    viewModel.fragmentRequest
+                )
             }
             startActivity(intent)
         }
@@ -60,10 +69,10 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
         filterSearchView.setOnQueryTextListener(onFilterQueryTextListener)
     }
 
-    private fun onLinesSelectedListener(adapter: DialogLineRecyclerViewAdapter) {
+    private fun onLinesSelected(adapter: DialogLineRecyclerViewAdapter, position: Int) {
         if (filterSearchView.query.isNotBlank()) {
             filterSearchView.setQuery("", false)
-            //recyclerView.scrollTo()
+            scrollPosition = position
         }
         if (adapter.selectedItems.size() >= 1) {
             selectButton.isEnabled = true
@@ -73,12 +82,17 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
         }
     }
 
-    private fun onResponseListener() {
+    private fun onResponse() {
         recyclerView.adapter = DialogLineRecyclerViewAdapter(viewModel.lines).apply {
-            setOnLinesSelectedListener { adapter -> onLinesSelectedListener(adapter) }
+            setOnLinesSelectedListener { adapter, position -> onLinesSelected(adapter, position) }
+            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onChanged() {
+                    recyclerView.scrollToPosition(scrollPosition)
+                }
+            })
         }
-        if (intent.hasExtra("POSITION")) {
-            val position: Int = intent.getIntExtra("POSITION", 0)
+        if (intent.hasExtra("com.example.springfragmenterclient.POSITION")) {
+            val position: Int = intent.getIntExtra("com.example.springfragmenterclient.POSITION", 0)
             recyclerView.apply {
                 scrollToPosition(position)
                 (adapter as DialogLineRecyclerViewAdapter).apply {
@@ -95,7 +109,7 @@ class SelectedMovieActivity : DaggerAppCompatActivity() {
         }
 
         override fun onQueryTextChange(p0: String?): Boolean {
-            (recyclerView.adapter as DialogLineRecyclerViewAdapter).filter.filter(p0)
+            (recyclerView.adapter as? DialogLineRecyclerViewAdapter)?.filter?.filter(p0)
             return false
         }
 

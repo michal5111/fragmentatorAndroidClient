@@ -17,6 +17,7 @@ import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.R
@@ -32,7 +33,7 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    lateinit var viewModel: FragmentRequestViewModel
+    private lateinit var viewModel: FragmentRequestViewModel
     private lateinit var textView: TextView
     private lateinit var openButton: Button
     private lateinit var convertButton: Button
@@ -45,7 +46,13 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var progressBar: ProgressBar
     private lateinit var mediaController: MediaController
-    private lateinit var playButton: ImageButton
+    private val messageObserver = Observer<String> {
+        textView.text = it
+        scrollView.fullScroll(ScrollView.FOCUS_DOWN)
+    }
+    private val percentageObserver = Observer<Int> {
+        conversionProgressBar.progress = it
+    }
 
     private object RequestCodes {
         const val DOWNLOAD_PERMISSION_REQUEST = 0
@@ -57,9 +64,10 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         viewModel =
             ViewModelProvider(this, viewModelFactory)[FragmentRequestViewModel::class.java]
         setContentView(R.layout.activity_fragment_request)
-        viewModel.movie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
+        viewModel.movie =
+            intent.getSerializableExtra("com.example.springfragmenterclient.SELECTED_MOVIE") as Movie
         viewModel.fragmentRequest =
-            intent.getSerializableExtra("FRAGMENT_REQUEST") as FragmentRequest
+            intent.getSerializableExtra("com.example.springfragmenterclient.FRAGMENT_REQUEST") as FragmentRequest
         textView = findViewById(R.id.event_text)
         openButton = findViewById(R.id.open_button)
         downloadButton = findViewById(R.id.download_button)
@@ -69,17 +77,12 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         startOffsetEditText = findViewById(R.id.startOffsetEditText)
         stopOffsetEditText = findViewById(R.id.stopOffsetEditText)
         shareButton = findViewById(R.id.share_button)
-        playButton = findViewById(R.id.playButton)
         videoView = findViewById(R.id.video_view)
         mediaController = MediaController(this)
-        //videoView.setMediaController(mediaController)
+        videoView.setMediaController(mediaController)
         videoView.setOnPreparedListener {
             mediaController.setAnchorView(videoView)
             progressBar.visibility = View.INVISIBLE
-            playButton.isEnabled = true
-        }
-        playButton.setOnClickListener {
-            videoView.start()
         }
         progressBar = findViewById(R.id.progressBar)
         startOffsetEditText.addTextChangedListener(startOffsetTextWatcher)
@@ -87,22 +90,23 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         convertButton.setOnClickListener {
             viewModel.compositeDisposable += viewModel.saveFragmentRequest(viewModel.fragmentRequest)
                 .toObservable()
-                .flatMap { afterPostObservable(it) }
+                .flatMap(this::afterPostObservable)
                 .doOnSubscribe {
                     conversionProgressBar.progress = 0
                     convertButton.isEnabled = false
                 }
+                .doOnError {
+                    convertButton.isEnabled = true
+                }
                 .subscribeBy(
-                    onError = {
-                        this.runOnUiThread {
-                            (application as Fragmentator4000).errorHandler(it)
-                        }
-                    }
+                    onError = (application as Fragmentator4000)::errorHandler
                 )
 
         }
         viewModel.downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        viewModel.messageLiveData.observe(this, messageObserver)
+        viewModel.percentLiveData.observe(this, percentageObserver)
     }
 
     fun shareFile(uri: Uri) {
@@ -129,20 +133,23 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
     }
 
     private val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
-            Toast.makeText(p0, resources.getString(R.string.downloadComplete), Toast.LENGTH_SHORT)
-                .show()
-            if (viewModel.lastShare != -1L) {
-                val c: Cursor =
-                    viewModel.downloadManager.query(DownloadManager.Query().setFilterById(viewModel.lastShare))
-                if (c.moveToFirst()) {
-                    val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        val movieURI =
-                            Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)))
-                        viewModel.lastShare = -1L
-                        shareFile(movieURI)
-                    }
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Toast.makeText(
+                context,
+                resources.getString(R.string.downloadComplete),
+                Toast.LENGTH_SHORT
+            ).show()
+            if (viewModel.lastShare == -1L) return
+            val c: Cursor = viewModel
+                .downloadManager
+                .query(DownloadManager.Query().setFilterById(viewModel.lastShare))
+            if (c.moveToFirst()) {
+                val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    val movieURI =
+                        Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)))
+                    viewModel.lastShare = -1L
+                    shareFile(movieURI)
                 }
             }
         }
@@ -153,7 +160,7 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun openButtonOnClickListener(fileName: String) {
+    private fun openButtonOnClick(fileName: String) {
         val openVideo = Intent(
             Intent.ACTION_VIEW,
             Uri.parse("${Fragmentator4000.fragmentsUrl}/$fileName")
@@ -161,7 +168,7 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         startActivity(openVideo)
     }
 
-    private fun downloadButtonOnClickListener(fileName: String) {
+    private fun downloadButtonOnClick(fileName: String) {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,
@@ -169,11 +176,11 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
                 RequestCodes.DOWNLOAD_PERMISSION_REQUEST
             )
         } else {
-            viewModel.lastDownload = viewModel.downloadManagerEnqueueForDownload(fileName, this)
+            viewModel.lastDownload = viewModel.downloadManagerEnqueueForDownload(fileName)
         }
     }
 
-    private fun shareButtonOnClickListener(fileName: String) {
+    private fun shareButtonOnClick(fileName: String) {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this@FragmentRequestActivity,
@@ -194,7 +201,7 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
         when (requestCode) {
             RequestCodes.DOWNLOAD_PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.downloadManagerEnqueueForDownload(viewModel.fileName, this)
+                    viewModel.downloadManagerEnqueueForDownload(viewModel.fileName)
                 }
             }
             RequestCodes.SHARE_PERMISSION_REQUEST -> {
@@ -206,21 +213,22 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
     }
 
     private val stopOffsetTextWatcher = object : TextWatcher {
-        override fun afterTextChanged(p0: Editable?) {
+        override fun afterTextChanged(ed: Editable?) {
             try {
-                viewModel.fragmentRequest.stopOffset = p0.toString().toDouble()
+                viewModel.fragmentRequest.stopOffset = ed.toString().toDouble()
             } catch (e: Exception) {
                 viewModel.fragmentRequest.stopOffset = 0.0
             }
         }
 
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        override fun beforeTextChanged(cs: CharSequence?, p1: Int, p2: Int, p3: Int) {
         }
 
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        override fun onTextChanged(cs: CharSequence?, p1: Int, p2: Int, p3: Int) {
             openButton.isEnabled = false
             downloadButton.isEnabled = false
             shareButton.isEnabled = false
+            convertButton.isEnabled = true
         }
     }
 
@@ -240,40 +248,22 @@ class FragmentRequestActivity : DaggerAppCompatActivity() {
             openButton.isEnabled = false
             downloadButton.isEnabled = false
             shareButton.isEnabled = false
+            convertButton.isEnabled = true
         }
     }
 
     private fun afterPostObservable(fragmentRequest: FragmentRequest) =
         viewModel.requestFragment(fragmentRequest.id!!)
-            .doOnNext { conversionStatus ->
-                if (conversionStatus.eventType == "log") {
-                    if (conversionStatus.logLine!!.contains("frame=")) {
-                        conversionProgressBar.progress = viewModel.percent.toInt()
-                    }
-                    this@FragmentRequestActivity.runOnUiThread {
-                        textView.text = viewModel.message
-                        scrollView.fullScroll(ScrollView.FOCUS_DOWN)
-                    }
-                } else if (conversionStatus.eventType == "complete") {
-                    conversionProgressBar.progress = 100
-                }
-            }
-            .doOnSubscribe {
-                viewModel.message = ""
-                textView.post { textView.text = viewModel.message }
-                playButton.isEnabled = true
-            }.doOnComplete {
-                this@FragmentRequestActivity.runOnUiThread {
-                    openButton.setOnClickListener { openButtonOnClickListener(viewModel.fileName) }
-                    downloadButton.setOnClickListener { downloadButtonOnClickListener(viewModel.fileName) }
-                    shareButton.setOnClickListener { shareButtonOnClickListener(viewModel.fileName) }
-                    convertButton.isEnabled = true
-                    openButton.isEnabled = true
-                    downloadButton.isEnabled = true
-                    shareButton.isEnabled = true
-                    progressBar.visibility = View.VISIBLE
-                    videoView.setVideoURI(("${Fragmentator4000.fragmentsUrl}/${viewModel.fileName}").toUri())
-                    videoView.start()
-                }
+            .doOnComplete {
+                openButton.setOnClickListener { openButtonOnClick(viewModel.fileName) }
+                downloadButton.setOnClickListener { downloadButtonOnClick(viewModel.fileName) }
+                shareButton.setOnClickListener { shareButtonOnClick(viewModel.fileName) }
+                openButton.isEnabled = true
+                downloadButton.isEnabled = true
+                shareButton.isEnabled = true
+                progressBar.visibility = View.VISIBLE
+                videoView.setVideoURI(("${Fragmentator4000.fragmentsUrl}/${viewModel.fileName}").toUri())
+                videoView.start()
+                mediaController.hide()
             }
 }

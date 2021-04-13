@@ -25,12 +25,14 @@ class FragmentRequestRepository @Inject constructor(
         apiService.requestFragment(id)
             .subscribeOn(Schedulers.io())
             .flatMap { responseBody -> events(responseBody.source()) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .map { line -> gson.fromJson(line, ConversionStatus::class.java) }
 
     private fun events(source: BufferedSource): Observable<String> = Observable.create { subscriber ->
         while (!source.exhausted()) {
             try {
-                subscriber.onNext(source.readUtf8Line()!!)
+                subscriber.onNext(source.readUtf8Line() ?: "")
             } catch (e: Exception) {
                 subscriber.onError(e)
             }

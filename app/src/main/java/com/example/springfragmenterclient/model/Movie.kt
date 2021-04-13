@@ -12,5 +12,11 @@ data class Movie(
     @Expose
     var fileName: String,
     @Expose
-    var path: String
+    var path: String,
+    @Expose
+    var parsedTitle: String?,
+    @Expose
+    var year: Int?,
+    @Expose
+    var resolution: String?
 ) : Serializable

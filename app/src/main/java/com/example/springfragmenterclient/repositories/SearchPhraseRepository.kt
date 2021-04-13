@@ -9,8 +9,6 @@ import javax.inject.Inject
 
 class SearchPhraseRepository @Inject constructor(private val apiService: ApiService) {
 
-    private val PAGE_SIZE = 20
-
     fun getHints(phrase: String): Flowable<List<Line>> =
         apiService.lineHints(phrase)
             .subscribeOn(Schedulers.io())

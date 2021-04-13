@@ -36,7 +36,7 @@ class SelectedLineActivity : DaggerAppCompatActivity() {
     private lateinit var lineEditRecyclerView: RecyclerView
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    lateinit var viewModel: SelectedLineViewModel
+    private lateinit var viewModel: SelectedLineViewModel
 
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,15 +50,18 @@ class SelectedLineActivity : DaggerAppCompatActivity() {
         progressBar = findViewById(R.id.SelectedLineProgressBar)
         lineEditRecyclerView = findViewById(R.id.LineEditRecyclerView)
         viewModel.apply {
-            selectedMovie = intent.getSerializableExtra("SELECTED_MOVIE") as Movie
-            selectedLine = intent.getSerializableExtra("SELECTED_LINE") as Line
+            selectedMovie =
+                intent.getSerializableExtra("com.example.springfragmenterclient.SELECTED_MOVIE") as Movie
+            selectedLine =
+                intent.getSerializableExtra("com.example.springfragmenterclient.SELECTED_LINE") as Line
             fragmentRequest.apply {
                 movieId = viewModel.selectedMovie.id
                 startLineId = viewModel.selectedLine.id
                 stopLineId = viewModel.selectedLine.id
             }
         }
-        movieTitleTextView.text = viewModel.selectedMovie.fileName
+        movieTitleTextView.text =
+            viewModel.selectedMovie.parsedTitle ?: viewModel.selectedMovie.fileName
         movieTimeTextView.text = viewModel.selectedLine.timeString
         textView.text =
             HtmlCompat.fromHtml(viewModel.selectedLine.textLines, Html.FROM_HTML_MODE_LEGACY)
@@ -66,8 +69,14 @@ class SelectedLineActivity : DaggerAppCompatActivity() {
         downloadButton.setOnClickListener {
             viewModel.setLineEdits(lineEditRecyclerView)
             val intent = Intent(applicationContext, FragmentRequestActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", viewModel.selectedMovie)
-                putExtra("FRAGMENT_REQUEST", viewModel.fragmentRequest)
+                putExtra(
+                    "com.example.springfragmenterclient.SELECTED_MOVIE",
+                    viewModel.selectedMovie
+                )
+                putExtra(
+                    "com.example.springfragmenterclient.FRAGMENT_REQUEST",
+                    viewModel.fragmentRequest
+                )
             }
             startActivity(intent)
         }
@@ -76,8 +85,14 @@ class SelectedLineActivity : DaggerAppCompatActivity() {
         val dialogButton: Button = findViewById(R.id.Dialog)
         dialogButton.setOnClickListener {
             val intent = Intent(applicationContext, SelectedMovieActivity::class.java).apply {
-                putExtra("SELECTED_MOVIE", viewModel.selectedMovie)
-                putExtra("POSITION", viewModel.selectedLine.number - 1)
+                putExtra(
+                    "com.example.springfragmenterclient.SELECTED_MOVIE",
+                    viewModel.selectedMovie
+                )
+                putExtra(
+                    "com.example.springfragmenterclient.POSITION",
+                    viewModel.selectedLine.number - 1
+                )
             }
             startActivity(intent)
         }

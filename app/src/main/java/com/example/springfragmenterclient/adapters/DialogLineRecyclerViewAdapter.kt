@@ -14,6 +14,7 @@ import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.model.Line
+import java.util.*
 
 class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
     RecyclerView.Adapter<DialogLineRecyclerViewAdapter.ViewHolder>(), Filterable {
@@ -29,14 +30,14 @@ class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
     }
 
     private val filterByTitle = object : Filter() {
-        override fun performFiltering(p0: CharSequence?): FilterResults {
+        override fun performFiltering(sequence: CharSequence?): FilterResults {
             val filteredList: MutableList<Line> = emptyList<Line>().toMutableList()
-            if (p0.isNullOrBlank()) {
+            if (sequence.isNullOrBlank()) {
                 filteredList.addAll(dataSetFull)
             } else {
-                val pattern = p0.toString().toUpperCase().trim()
+                val pattern = sequence.toString().toUpperCase(Locale.ROOT).trim()
                 dataSetFull.forEach {
-                    if (it.textLines.toUpperCase().contains(pattern)) {
+                    if (it.textLines.toUpperCase(Locale.ROOT).contains(pattern)) {
                         filteredList.add(it)
                     }
                 }
@@ -46,16 +47,20 @@ class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
             return filteredResults
         }
 
-        override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
-            dataSet.clear()
-            dataSet.addAll(p1!!.values as MutableList<Line>)
-            notifyDataSetChanged()
+        override fun publishResults(cs: CharSequence?, fr: FilterResults?) {
+            fr?.let {
+                dataSet.clear()
+                dataSet.addAll(it.values as MutableList<Line>)
+                notifyDataSetChanged()
+            }
         }
 
     }
 
-    val selectedItems: SparseBooleanArray = SparseBooleanArray()
-    private var dataSelectedListener: ((adapter: DialogLineRecyclerViewAdapter) -> Unit)? = null
+    val selectedItems = SparseBooleanArray()
+
+    private var dataSelectedListener: ((adapter: DialogLineRecyclerViewAdapter, position: Int) -> Unit)? =
+        null
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val timeTextView: TextView = v.findViewById(R.id.TimeTextView)
@@ -84,16 +89,20 @@ class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
                 if (selectedItems.get(position, false)) {
                     for (i in position until position + selectedItems.size()) {
                         selectedItems.delete(i)
+                        notifyItemChanged(i)
                     }
 
                 } else {
                     selectedItems.put(dataSetFull.indexOf(dataSet[position]), true)
                     for (i in selectedItems.keyAt(0)..selectedItems.keyAt(selectedItems.size() - 1)) {
                         selectedItems.put(i, true)
+                        notifyItemChanged(i)
                     }
                 }
-                notifyDataSetChanged()
-                dataSelectedListener?.invoke(this@DialogLineRecyclerViewAdapter)
+                dataSelectedListener?.invoke(
+                    this@DialogLineRecyclerViewAdapter,
+                    dataSetFull.indexOf(dataSet[position])
+                )
             }
         }
         if (selectedItems.get(position,false)) {
@@ -107,7 +116,7 @@ class DialogLineRecyclerViewAdapter(private val dataSetFull: List<Line>) :
 
     override fun getItemCount() = dataSet.size
 
-    fun setOnLinesSelectedListener(onLinesSelectedListener: (adapter: DialogLineRecyclerViewAdapter) -> Unit) {
+    fun setOnLinesSelectedListener(onLinesSelectedListener: (adapter: DialogLineRecyclerViewAdapter, position: Int) -> Unit) {
         dataSelectedListener = onLinesSelectedListener
     }
 }

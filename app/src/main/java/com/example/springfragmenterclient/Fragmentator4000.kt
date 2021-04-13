@@ -1,6 +1,7 @@
 package com.example.springfragmenterclient
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -11,14 +12,30 @@ import com.example.springfragmenterclient.rest.responses.ErrorResponse
 import com.google.gson.Gson
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
+import org.acra.ACRA
+import org.acra.annotation.AcraCore
+import org.acra.annotation.AcraHttpSender
+import org.acra.data.StringFormat
+import org.acra.sender.HttpSender
 import retrofit2.HttpException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import javax.inject.Inject
 
-
+@AcraCore(
+    buildConfigClass = BuildConfig::class,
+    reportFormat = StringFormat.JSON,
+)
+@AcraHttpSender(
+    uri = "http://acrarium.mkubiak.it/report",
+    basicAuthLogin = "yyzEfXxXlEmIRDI2",
+    basicAuthPassword = "213DiUw6vVxnX4Zs",
+    httpMethod = HttpSender.Method.POST
+)
 class Fragmentator4000 : DaggerApplication() {
 
-    private val gson: Gson = Gson()
+    @Inject
+    lateinit var gson: Gson
 
     companion object {
         private const val serverUrl = "http://michal5111.ddns.net:8080/fragmentatorServer"
@@ -49,24 +66,36 @@ class Fragmentator4000 : DaggerApplication() {
 
     }
 
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        ACRA.init(this)
+    }
+
     fun errorHandler(throwable: Throwable) {
         Log.e("FragmenterError", throwable.message, throwable)
+        var errorMessage = "Error ${throwable.message}"
         if (throwable is HttpException) {
             val errorJson = throwable.response()?.errorBody()?.string()
             if (errorJson != null) {
+                val errorStatus = throwable.code()
                 if (errorJson.isNotBlank()) {
-                    val errorResponse =
-                        gson.fromJson(errorJson, ErrorResponse::class.java)
-                    Toast.makeText(this, getString(
-                        R.string.httpError,
-                        errorResponse.status,
-                        errorResponse.message
-                    ), Toast.LENGTH_LONG)
-                        .show()
+                    try {
+                        val errorResponse = gson.fromJson(errorJson, ErrorResponse::class.java)
+                        errorMessage = errorResponse.message
+                    } catch (e: Exception) {
+                    }
                 }
+                Toast.makeText(
+                    this, getString(
+                        R.string.httpError,
+                        errorStatus,
+                        errorMessage
+                    ), Toast.LENGTH_LONG
+                )
+                    .show()
             }
         } else {
-            Toast.makeText(this, "error ${throwable.localizedMessage}", Toast.LENGTH_LONG)
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG)
                 .show()
         }
 

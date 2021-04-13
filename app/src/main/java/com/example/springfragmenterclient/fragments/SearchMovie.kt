@@ -30,7 +30,7 @@ class SearchMovie : DaggerFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    lateinit var viewModel: SearchMovieViewModel
+    private lateinit var viewModel: SearchMovieViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
@@ -56,27 +56,29 @@ class SearchMovie : DaggerFragment() {
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         @SuppressLint("CheckResult")
-        override fun onQueryTextSubmit(p0: String?): Boolean {
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            val queryText = query ?: ""
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             viewModel.compositeDisposable +=
-                viewModel.getMovies(Fragmentator4000.encodeValue(p0.toString()))
+                viewModel.getMovies(Fragmentator4000.encodeValue(queryText))
                     .doOnSubscribe { progressBar.visibility = View.VISIBLE }
                     .doFinally { progressBar.visibility = View.INVISIBLE }
                     .subscribeBy(
                         onNext = this@SearchMovie::showMovies,
-                        onError = (activity!!.application as Fragmentator4000)::errorHandler
+                        onError = (requireActivity().application as Fragmentator4000)::errorHandler
                     )
 
             return true
         }
 
         @SuppressLint("CheckResult")
-        override fun onQueryTextChange(p0: String?): Boolean {
+        override fun onQueryTextChange(query: String?): Boolean {
+            val queryText = query ?: ""
             viewModel.compositeDisposable +=
-                viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
+                viewModel.getHints(Fragmentator4000.encodeValue(queryText))
                     .subscribeBy(
-                        onNext = { createAdapter(it) },
-                        onError = (activity!!.application as Fragmentator4000)::errorHandler
+                        onNext = this@SearchMovie::createAdapter,
+                        onError = (requireActivity().application as Fragmentator4000)::errorHandler
                     )
             return false
         }
@@ -88,7 +90,7 @@ class SearchMovie : DaggerFragment() {
 
     fun createAdapter(cursor: MatrixCursor) {
         searchView.suggestionsAdapter = MovieSuggestionsCursorAdapter(
-            context!!,
+            requireContext(),
             cursor,
             true,
             searchView

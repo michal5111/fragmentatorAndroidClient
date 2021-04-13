@@ -4,6 +4,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.os.Environment
 import androidx.core.net.toUri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.springfragmenterclient.Fragmentator4000
 import com.example.springfragmenterclient.model.FragmentRequest
@@ -18,10 +20,20 @@ import javax.inject.Inject
 class FragmentRequestViewModel
 @Inject constructor(private val fragmentRequestRepository: FragmentRequestRepository) :
     ViewModel() {
+    private val _messageLiveData: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
+    private var to: Double = 0.0
+    private val _percentLiveData: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
 
-    var message: String = ""
-    var percent: Double = 0.0
-    var to: Double = 0.0
+    val messageLiveData: LiveData<String>
+        get() = _messageLiveData
+
+    val percentLiveData: LiveData<Int>
+        get() = _percentLiveData
+
     var lastDownload: Long = -1L
     var lastShare: Long = -1L
     val compositeDisposable = CompositeDisposable()
@@ -32,25 +44,29 @@ class FragmentRequestViewModel
 
     fun saveFragmentRequest(fragmentRequest: FragmentRequest): Single<FragmentRequest> =
         fragmentRequestRepository.save(fragmentRequest)
-            .map {
+            .doOnSuccess {
                 this.fragmentRequest = it
-                return@map it
             }
 
     fun requestFragment(id: Long): Observable<ConversionStatus> =
         fragmentRequestRepository.fragmentRequest(id)
             .doOnNext {
-                message = message.plus(it.logLine).plus("\n")
-                if (it.eventType == "to") {
-                    to = it.timeLength!!
-                } else if (it.eventType == "log") {
-                    if (it.logLine!!.contains("frame=")) {
-                        val offset = it.logLine.lastIndexOf("time=")
-                        val time = it.logLine.substring(offset + 5, offset + 16)
-                        percent = Fragmentator4000.timeToSeconds(time) * 100.0 / to
+                when {
+                    it.eventType == "to" && it.timeLength != null -> {
+                        to = it.timeLength
                     }
-                } else if (it.eventType == "complete") {
-                    fileName = it.logLine!!
+                    it.eventType == "log" && it.logLine != null -> {
+                        _messageLiveData.value = _messageLiveData.value.plus(it.logLine).plus("\n")
+                        if (it.logLine.contains("frame=")) {
+                            val offset = it.logLine.lastIndexOf("time=")
+                            val time = it.logLine.substring(offset + 5, offset + 16)
+                            _percentLiveData.value =
+                                (Fragmentator4000.timeToSeconds(time) * 100.0 / to).toInt()
+                        }
+                    }
+                    it.eventType == "complete" && it.logLine != null -> {
+                        fileName = it.logLine
+                    }
                 }
             }
 
@@ -73,7 +89,7 @@ class FragmentRequestViewModel
                 )
         )
 
-    fun downloadManagerEnqueueForDownload(fileName: String, context: Context) =
+    fun downloadManagerEnqueueForDownload(fileName: String) =
         downloadManager.enqueue(
             DownloadManager.Request(("${Fragmentator4000.fragmentsUrl}/$fileName").toUri())
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)

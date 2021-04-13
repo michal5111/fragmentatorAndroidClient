@@ -19,8 +19,7 @@ class SelectedLineViewModel
     internal var fragmentRequest: FragmentRequest = FragmentRequest()
     val compositeDisposable = CompositeDisposable()
 
-    fun getLineSnapshot(id: Long) =
-        lineRepository.getLineSnapshot(id)
+    fun getLineSnapshot(id: Long) = lineRepository.getLineSnapshot(id)
 
     internal fun setLineEdits(lineEditRecyclerView: RecyclerView) {
         fragmentRequest.lineEdits.clear()

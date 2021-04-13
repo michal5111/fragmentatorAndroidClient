@@ -10,7 +10,6 @@ import android.widget.ProgressBar
 import android.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.springfragmenterclient.Fragmentator4000
@@ -18,7 +17,7 @@ import com.example.springfragmenterclient.R
 import com.example.springfragmenterclient.activities.MainActivity
 import com.example.springfragmenterclient.adapters.LineSuggestionsCursorAdapter
 import com.example.springfragmenterclient.adapters.LineWithMovieTitleRecyclerViewAdapter
-import com.example.springfragmenterclient.model.Line
+import com.example.springfragmenterclient.dataSources.LineDataSource
 import dagger.android.support.DaggerFragment
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
@@ -32,12 +31,19 @@ class SearchPhrase : DaggerFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    lateinit var viewModel: SearchPhraseViewModel
+    private lateinit var viewModel: SearchPhraseViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
     private lateinit var filterSearchView: SearchView
     private lateinit var lineAdapter: LineWithMovieTitleRecyclerViewAdapter
+    private val dataSourceObserver: Observer<LineDataSource> = Observer {
+        it.resultSizeLiveData.observe(viewLifecycleOwner, resultSizeObserver)
+    }
+    private val resultSizeObserver: Observer<Int> = Observer {
+        filterSearchView.visibility =
+            if (it > 0 || filterSearchView.query.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,16 +67,15 @@ class SearchPhrase : DaggerFragment() {
         viewModel = ViewModelProvider(this, viewModelFactory)[SearchPhraseViewModel::class.java]
         lineAdapter = LineWithMovieTitleRecyclerViewAdapter()
         recyclerView.adapter = lineAdapter
+        viewModel.liveDataSource.observe(viewLifecycleOwner, dataSourceObserver)
     }
 
     private fun setObserver() {
-        viewModel.linePagedList.observe(this,
-            Observer<PagedList<Line>> {
-                lineAdapter.submitList(it)
-                    progressBar.visibility = View.INVISIBLE
-            })
+        viewModel.linePagedList?.observe(this) {
+            lineAdapter.submitList(it)
+            progressBar.visibility = View.INVISIBLE
+        }
     }
-
 
 
     private val onSearchQueryTextListener = object : SearchView.OnQueryTextListener {
@@ -81,26 +86,25 @@ class SearchPhrase : DaggerFragment() {
                 viewModel.getHints(Fragmentator4000.encodeValue(p0.toString()))
                     .subscribeBy(
                         onNext = this@SearchPhrase::createAdapter,
-                        onError = (activity!!.application as Fragmentator4000)::errorHandler
+                        onError = (requireActivity().application as Fragmentator4000)::errorHandler
                     )
             return false
         }
 
-        override fun onQueryTextSubmit(p0: String?): Boolean {
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            val queryText = query ?: ""
             Fragmentator4000.hideKeyboard(activity as MainActivity)
             progressBar.visibility = View.VISIBLE
-            viewModel.phrase = p0.toString()
-            viewModel.createLiveData(viewModel.phrase, viewModel.title)
+            viewModel.setPhrase(queryText)
             setObserver()
             searchView.clearFocus()
-            filterSearchView.visibility = View.VISIBLE
             return true
         }
     }
 
     private fun createAdapter(cursor: MatrixCursor) {
         searchView.suggestionsAdapter = LineSuggestionsCursorAdapter(
-            context!!,
+            requireContext(),
             cursor,
             true,
             searchView
@@ -113,9 +117,9 @@ class SearchPhrase : DaggerFragment() {
             return false
         }
 
-        override fun onQueryTextChange(p0: String?): Boolean {
-            viewModel.title = p0.toString()
-            viewModel.createLiveData(viewModel.phrase, viewModel.title)
+        override fun onQueryTextChange(title: String?): Boolean {
+            val titleText = title ?: ""
+            viewModel.setTitle(titleText)
             setObserver()
             return false
         }

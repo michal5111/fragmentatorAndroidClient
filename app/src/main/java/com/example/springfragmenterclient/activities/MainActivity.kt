@@ -25,15 +25,15 @@ class MainActivity : AppCompatActivity() {
 
     fun selectLine(movie: Movie, line: Line) {
         val intent = Intent(this, SelectedLineActivity::class.java).apply {
-            putExtra("SELECTED_MOVIE",movie)
-            putExtra("SELECTED_LINE",line)
+            putExtra("com.example.springfragmenterclient.SELECTED_MOVIE", movie)
+            putExtra("com.example.springfragmenterclient.SELECTED_LINE", line)
         }
         startActivity(intent)
     }
 
     fun selectMovie(movie: Movie) {
         val intent = Intent(this, SelectedMovieActivity::class.java).apply {
-            putExtra("SELECTED_MOVIE",movie)
+            putExtra("com.example.springfragmenterclient.SELECTED_MOVIE", movie)
         }
         startActivity(intent)
     }

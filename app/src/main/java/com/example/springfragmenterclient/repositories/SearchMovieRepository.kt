@@ -10,8 +10,6 @@ import javax.inject.Inject
 
 class SearchMovieRepository @Inject constructor(private val apiService: ApiService) {
 
-    private val PAGE_SIZE = 20
-
     fun getMoviesByTitle(title: String): Flowable<List<Movie>> =
         apiService.searchMovie(title)
             .subscribeOn(Schedulers.io())

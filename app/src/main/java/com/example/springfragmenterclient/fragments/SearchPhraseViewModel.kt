@@ -2,9 +2,9 @@ package com.example.springfragmenterclient.fragments
 
 import android.database.MatrixCursor
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
-import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
 import com.example.springfragmenterclient.dataSources.LineDataSource
 import com.example.springfragmenterclient.dataSources.LineDataSourceFactory
@@ -18,17 +18,29 @@ class SearchPhraseViewModel @Inject constructor(
     private val lineDataSourceFactory: LineDataSourceFactory
 ) : ViewModel() {
 
-    lateinit var linePagedList: LiveData<PagedList<Line>>
-    private var liveDataSource: LiveData<PageKeyedDataSource<Long, Line>> =
-        lineDataSourceFactory.lineLiveData
+    private val _phraseLiveData: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
+
+    private val _titleLiveData: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
+
+    val phraseLiveData: LiveData<String>
+        get() = _phraseLiveData
+
+    val titleLiveData: LiveData<String>
+        get() = _titleLiveData
+
+    var linePagedList: LiveData<PagedList<Line>>? = null
+
+    val liveDataSource: LiveData<LineDataSource>
+        get() = lineDataSourceFactory.lineLiveData
     val compositeDisposable = CompositeDisposable()
     private val config: PagedList.Config = PagedList.Config.Builder()
         .setEnablePlaceholders(false)
         .setPageSize(LineDataSource.PAGE_SIZE)
         .build()
-
-    var title: String? = null
-    var phrase: String = ""
 
     fun getHints(phrase: String) =
         searchPhraseRepository.getHints(phrase)
@@ -44,16 +56,28 @@ class SearchPhraseViewModel @Inject constructor(
                 return@map cursor
             }
 
-    fun createLiveData(phrase: String, title: String?) {
-        lineDataSourceFactory.apply {
-            this.title = title
-            this.phrase = phrase
+    private fun createLiveData() {
+        this.phraseLiveData.value?.let {
+            lineDataSourceFactory.apply {
+                this.title = titleLiveData.value
+                this.phrase = it
+            }
+            linePagedList = LivePagedListBuilder(lineDataSourceFactory, config).build()
         }
-        linePagedList = LivePagedListBuilder(lineDataSourceFactory, config).build()
     }
 
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
+    }
+
+    fun setTitle(title: String) {
+        _titleLiveData.value = title
+        createLiveData()
+    }
+
+    fun setPhrase(phrase: String) {
+        _phraseLiveData.value = phrase
+        createLiveData()
     }
 }
